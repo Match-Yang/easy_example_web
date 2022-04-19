@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example</title>
+</head>
+<style>
+    html, body {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    #video-con1 {
+        display: inline-block;
+        border: 1px solid #ddd;
+        box-sizing: border-box;
+        background: #c2c2c2;
+    }
+    #video-con2 {
+        display: inline-block;
+        border: 1px solid #ddd;
+        background: #ddd;
+        box-sizing: border-box;
+        width: 40%;
+        height: 40%;
+    }
+    @media screen and (min-width: 901px) {
+        #video-con1 {
+            width: 40%;
+            height: 40%;
+        }
+    }
+    @media screen and (max-width: 900px) {
+        #video-con1 {
+            width: 100%;
+            height: 70%;
+        }
+        #video-con2 {
+            position: fixed;
+            top: 0px;
+            right: 0px;
+        }
+    }
+</style>
+<body>
+    <video id="video-con1" autoplay muted></video>
+    <video id="video-con2" autoplay></video>
+    <div>
+        <button onclick="initSDK()">init SDK</button>
+        <button onclick="checkWebRTC()">checkWebRTC</button>
+        <button onclick="checkCamera()">checkCamera</button>
+        <button onclick="checkMicrophone()">checkMicrophone</button>
+        <button onclick="joinRoom()">joinRoom</button>
+        <button onclick="enableCamera()">enableCamera</button>
+        <button onclick="enableMic()">enableMic</button>
+        <button onclick="leaveRoom()">leaveRoom</button>
+    </div>
+    <script src="./ZegoExpressManager.js"></script>
+    <script src="./index.js"></script>
+</body>
+</html>
