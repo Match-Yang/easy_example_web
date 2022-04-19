@@ -50,9 +50,9 @@ async function checkMicrophone() {
     await ZegoExpressManager.shared.checkMicrophone();
     alert('check success');
 }
-async function joinRoom(options) {
+async function joinRoom() {
     const token = (await generateToken()).data.token
-    await ZegoExpressManager.shared.joinRoom(config.roomID, token, { userID: config.userID, userName: config.userName }, options);
+    await ZegoExpressManager.shared.joinRoom(config.roomID, token, { userID: config.userID, userName: config.userName });
     ZegoExpressManager.shared.setLocalVideoView(renderView1)
     alert('join success');
 }
