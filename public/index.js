@@ -4,7 +4,7 @@ const config = {
     //[My Projects] : https://console.zegocloud.com/project
     appID: appID,
     // Get your Server from ZEGOCLOUD Console
-    // [My Projects -> project's Edit -> Environment Configuration] : https://console.zegocloud.com/project"
+    // [My Projects -> project's Edit -> Basic Configurations -> Server URL] : https://console.zegocloud.com/project"
     server: server,
     userID: 'web_user_' + now,
     userName: 'web_user_' + now,
