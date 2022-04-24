@@ -25,7 +25,8 @@ function initSDK() {
         userList.forEach(user => {
             if (updateType === 'ADD') {
                 console.warn("roomUserUpdate");
-                ZegoExpressManager.shared.setRemoteVideoView(user.userID, renderView2)
+                const videoDom = ZegoExpressManager.shared.getRemoteVideoView(user.userID)
+                renderView2.appendChild(videoDom);
             }
         });
     })
@@ -53,7 +54,8 @@ async function checkMicrophone() {
 async function joinRoom() {
     const token = (await generateToken()).data.token
     await ZegoExpressManager.shared.joinRoom(config.roomID, token, { userID: config.userID, userName: config.userName });
-    ZegoExpressManager.shared.setLocalVideoView(renderView1)
+    const videoDom = ZegoExpressManager.shared.getLocalVideoView()
+    renderView1.appendChild(videoDom);
     alert('join success');
 }
 function enableCamera() {

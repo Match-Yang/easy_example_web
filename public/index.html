@@ -13,6 +13,10 @@
         padding: 0;
         margin: 0;
     }
+    video {
+        width: 100%;
+        height: 100%;
+    }
     #video-con1 {
         display: inline-block;
         border: 1px solid #ddd;
@@ -46,8 +50,8 @@
     }
 </style>
 <body>
-    <video id="video-con1" autoplay muted></video>
-    <video id="video-con2" autoplay></video>
+    <div id="video-con1"></div>
+    <div id="video-con2"></div>
     <div>
         <button onclick="initSDK()">init SDK</button>
         <button onclick="checkWebRTC()">checkWebRTC</button>

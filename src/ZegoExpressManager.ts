@@ -6,6 +6,7 @@ import {
   ZegoStreamList,
 } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
 import {
+  ZegoVideoViewType,
   ZegoDeviceUpdateType,
   ZegoMediaOptions,
   ZegoParticipant,
@@ -152,20 +153,23 @@ export class ZegoExpressManager {
     result && (this.localParticipant.mic = enable);
     return result;
   }
-  setLocalVideoView(renderView: HTMLMediaElement) {
+  getLocalVideoView(): HTMLMediaElement {
     if (!this.roomID) {
       console.error(
         "Error: [setVideoView] You need to join the room first and then set the videoView"
       );
     }
     const { streamID, userID } = this.localParticipant;
+    const renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
     const streamObj = this.streamMap.get(streamID) as MediaStream;
     renderView.srcObject = streamObj;
     this.localParticipant.renderView = renderView;
     this.participantDic.set(userID, this.localParticipant);
     this.streamDic.set(streamID, this.localParticipant);
+
+    return renderView;
   }
-  setRemoteVideoView(userID: string, renderView: HTMLMediaElement) {
+  getRemoteVideoView(userID: string): HTMLMediaElement {
     if (!this.roomID) {
       console.error(
         "Error: [setVideoView] You need to join the room first and then set the videoView"
@@ -176,6 +180,7 @@ export class ZegoExpressManager {
         "Error: [setVideoView] userID is empty, please enter a right userID"
       );
     }
+    const renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
     const participant = this.participantDic.get(userID) as ZegoParticipant;
     participant.renderView = renderView;
     this.participantDic.set(userID, participant);
@@ -186,6 +191,7 @@ export class ZegoExpressManager {
       // inner roomUserUpdate -> out roomUserUpdate -> inner roomStreamUpdate
     }
     this.renderViewHandle(userID);
+    return renderView;
   }
   leaveRoom() {
     ZegoExpressManager.engine.stopPublishingStream(
@@ -262,6 +268,18 @@ export class ZegoExpressManager {
     // For the convenience of query, roomID + UserID + suffix is used here.
     const streamID = roomID + "_" + userID + "_main_web";
     return streamID;
+  }
+  private generateVideoView(
+    type: ZegoVideoViewType,
+    userID: string
+  ): HTMLMediaElement {
+    const mediaDom = document.createElement("video");
+    mediaDom.id = "zego-video-" + userID;
+    mediaDom.autoplay = true;
+    if (type === ZegoVideoViewType.Local) {
+      mediaDom.muted = true;
+    }
+    return mediaDom;
   }
   private onOtherEvent() {
     ZegoExpressManager.engine.on(
