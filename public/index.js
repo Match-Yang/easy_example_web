@@ -21,11 +21,11 @@ function generateToken() {
 }
 function initSDK() {
     ZegoExpressManager.shared.createEngine(config.appID, config.server);
-    ZegoExpressManager.shared.onRoomUserUpdate((roomID, updateType, userList) => {
-        userList.forEach(user => {
+    ZegoExpressManager.shared.onRoomUserUpdate((updateType, userList, roomID) => {
+        userList.forEach(userID => {
             if (updateType === 'ADD') {
                 console.warn("roomUserUpdate");
-                const videoDom = ZegoExpressManager.shared.getRemoteVideoView(user.userID)
+                const videoDom = ZegoExpressManager.shared.getRemoteVideoView(userID)
                 renderView2.appendChild(videoDom);
             }
         });

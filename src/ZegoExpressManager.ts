@@ -215,12 +215,21 @@ export class ZegoExpressManager {
   }
   onRoomUserUpdate(
     fun: (
-      roomID: string,
       updateType: "DELETE" | "ADD",
-      userList: ZegoUser[]
+      userList: string[],
+      roomID: string
     ) => void
   ) {
-    return ZegoExpressManager.engine.on("roomUserUpdate", fun);
+    return ZegoExpressManager.engine.on(
+      "roomUserUpdate",
+      (roomID: string, updateType: "DELETE" | "ADD", userList: ZegoUser[]) => {
+        const userIDList: string[] = [];
+        userList.forEach((user: ZegoUser) => {
+          userIDList.push(user.userID);
+        });
+        fun(updateType, userIDList, roomID);
+      }
+    );
   }
   onRoomUserDeviceUpdate(
     fun: (

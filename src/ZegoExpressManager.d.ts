@@ -22,7 +22,7 @@ export declare class ZegoExpressManager {
     getLocalVideoView(): HTMLMediaElement;
     getRemoteVideoView(userID: string): HTMLMediaElement;
     leaveRoom(): void;
-    onRoomUserUpdate(fun: (roomID: string, updateType: "DELETE" | "ADD", userList: ZegoUser[]) => void): boolean;
+    onRoomUserUpdate(fun: (updateType: "DELETE" | "ADD", userList: string[], roomID: string) => void): boolean;
     onRoomUserDeviceUpdate(fun: (updateType: ZegoDeviceUpdateType, userID: string, roomID: string) => void): boolean;
     onRoomTokenWillExpire(fun: (roomID: string) => void): boolean;
     private playStream;
