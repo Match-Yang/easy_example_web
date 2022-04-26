@@ -85,7 +85,13 @@ export class ZegoExpressManager {
       return Promise.resolve(false);
     }
     this.roomID = roomID;
-    options && (this.mediaOptions = options);
+    if (options) {
+      this.mediaOptions = options.map((e) =>
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        typeof e === "object" ? e.index : e
+      );
+    }
 
     this.localParticipant.userID = user.userID;
     this.localParticipant.name = user.userName;
