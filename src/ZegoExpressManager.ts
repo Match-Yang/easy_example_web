@@ -227,7 +227,7 @@ export class ZegoExpressManager {
     this.localParticipant.renderView.srcObject = null;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    this.localParticipant = null;
+    this.localParticipant = {};
 
     return ZegoExpressManager.engine.logoutRoom();
   }
