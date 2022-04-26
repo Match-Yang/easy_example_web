@@ -123,6 +123,13 @@ export class ZegoExpressManager {
               source
             );
             this.streamMap.set(this.localParticipant.streamID, localStream);
+            // Determine if srcObject has been updated
+            if (
+              this.localParticipant.renderView &&
+              !this.localParticipant.renderView.srcObject
+            ) {
+              this.localParticipant.renderView.srcObject = localStream;
+            }
             await ZegoExpressManager.engine.startPublishingStream(
               this.localParticipant.streamID,
               localStream
@@ -162,7 +169,12 @@ export class ZegoExpressManager {
     const { streamID, userID } = this.localParticipant;
     const renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
     const streamObj = this.streamMap.get(streamID) as MediaStream;
-    renderView.srcObject = streamObj;
+    if (streamObj) {
+      // Render now
+      renderView.srcObject = streamObj;
+    } else {
+      // Delay rendering until stream is created successfully
+    }
     this.localParticipant.renderView = renderView;
     this.participantDic.set(userID, this.localParticipant);
     this.streamDic.set(streamID, this.localParticipant);
