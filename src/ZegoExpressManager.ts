@@ -220,8 +220,10 @@ export class ZegoExpressManager {
     );
     this.streamMap.forEach((streamObj, streamID) => {
       ZegoExpressManager.engine.stopPlayingStream(streamID);
-      (this.streamDic.get(streamID) as ZegoParticipant).renderView.srcObject =
-        null;
+      (this.streamDic.get(streamID) as ZegoParticipant).renderView &&
+        ((
+          this.streamDic.get(streamID) as ZegoParticipant
+        ).renderView.srcObject = null);
     });
     this.participantDic.clear();
     this.streamDic.clear();
