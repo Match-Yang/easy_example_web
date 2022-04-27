@@ -227,7 +227,8 @@ export class ZegoExpressManager {
     this.streamDic.clear();
     this.streamMap.clear();
     this.roomID = "";
-    this.localParticipant.renderView.srcObject = null;
+    this.localParticipant.renderView &&
+      (this.localParticipant.renderView.srcObject = null);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.localParticipant = {};
