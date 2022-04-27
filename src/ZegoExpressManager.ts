@@ -293,7 +293,7 @@ export class ZegoExpressManager {
 
     // The streamID can use any character.
     // For the convenience of query, roomID + UserID + suffix is used here.
-    const streamID = roomID + "_" + userID + "_main_web";
+    const streamID = roomID + userID + "_main";
     return streamID;
   }
   private generateVideoView(
