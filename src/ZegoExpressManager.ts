@@ -215,6 +215,9 @@ export class ZegoExpressManager {
     ZegoExpressManager.engine.stopPublishingStream(
       this.localParticipant.streamID
     );
+    ZegoExpressManager.engine.destroyStream(
+      this.streamMap.get(this.localParticipant.streamID) as MediaStream
+    );
     this.streamMap.forEach((streamObj, streamID) => {
       ZegoExpressManager.engine.stopPlayingStream(streamID);
       (this.streamDic.get(streamID) as ZegoParticipant).renderView.srcObject =
@@ -366,7 +369,8 @@ export class ZegoExpressManager {
             ZegoExpressManager.engine.stopPlayingStream(stream.streamID);
             this.streamMap.delete(stream.streamID);
             this.streamDic.delete(stream.streamID);
-            (participant as ZegoParticipant).renderView.srcObject = null;
+            (participant as ZegoParticipant).renderView &&
+              ((participant as ZegoParticipant).renderView.srcObject = null);
           }
         });
       }
