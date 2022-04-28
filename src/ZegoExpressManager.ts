@@ -86,13 +86,14 @@ export class ZegoExpressManager {
     }
     this.roomID = roomID;
     if (options) {
+      options = this.transFlutterData(options) as ZegoMediaOptions[];
       this.mediaOptions = options.map((e) =>
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         typeof e === "object" ? e.index : e
       );
     }
-
+    user = this.transFlutterData(user) as ZegoUser;
     this.localParticipant.userID = user.userID;
     this.localParticipant.name = user.userName;
     this.localParticipant.streamID = this.generateStreamID(user.userID, roomID);
@@ -449,5 +450,8 @@ export class ZegoExpressManager {
       const streamObj = this.streamMap.get(participant.streamID);
       participant.renderView.srcObject = streamObj as MediaStream;
     }
+  }
+  private transFlutterData<T>(data: T | string): T | string {
+    return typeof data === "string" ? JSON.parse(data) : data;
   }
 }

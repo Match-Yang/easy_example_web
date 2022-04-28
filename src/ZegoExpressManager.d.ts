@@ -30,4 +30,5 @@ export declare class ZegoExpressManager {
     private generateVideoView;
     private onOtherEvent;
     private renderViewHandle;
+    private transFlutterData;
 }
