@@ -171,7 +171,7 @@ ZegoExpressManager.shared.leaveRoom();
 
 ### 2022-05-09
 
-#### Code optimization
+#### Code Optimization
 
 1. Replace the original getLocalVideoView and setRemoteVideoView with getLocalVideoView and getRemoteVideoView. Automatically create video tag in ZegoExpressManager.
 2. Destroy the local stream when leaving the room.
