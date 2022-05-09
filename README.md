@@ -20,7 +20,7 @@ The following will describe how to start this project.
 
 ![config](/media/init.png)
 
-* You need to modify `appID` and `server` to your own account, which can be obtained in the [ZEGO Admin Console](https://console.zegocloud.com/).
+* You need to modify `appID` and `serverURL` to your own account, which can be obtained in the [ZEGO Admin Console](https://console.zegocloud.com/).
 * [Generate a Token on your app server (recommended)](https://docs.zegocloud.com/article/11648), provide an interface for the client to call and replace the generateToken method above.
 
 ### Run the sample code
@@ -64,7 +64,7 @@ createEngine --> onRoomUserUpdate、onRoomUserDeviceUpdate、onRoomTokenWillExpi
 Before using the SDK function, you need to create the SDK first. We recommend creating it when the application starts. The sample code is as follows:
 
 ```typescript
-ZegoExpressManager.shared.createEngine(config.appID, config.server);
+ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
 ```
 
 #### Register related callbacks

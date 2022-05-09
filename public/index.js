@@ -5,7 +5,7 @@ const config = {
     appID: appID,
     // Get your Server from ZEGOCLOUD Console
     // [My Projects -> project's Edit -> Basic Configurations -> Server URL] : https://console.zegocloud.com/project"
-    server: server,
+    serverURL: serverURL,
     userID: 'web_user_' + now,
     userName: 'web_user_' + now,
     roomID: 'web_room_123'
@@ -20,7 +20,7 @@ function generateToken() {
     return Promise.resolve({data: { token: '' }});
 }
 function initSDK() {
-    ZegoExpressManager.shared.createEngine(config.appID, config.server);
+    ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
     ZegoExpressManager.shared.onRoomUserUpdate((roomID, updateType, userList) => {
         userList.forEach(user => {
             if (updateType === 'ADD') {
