@@ -21,11 +21,14 @@ function generateToken() {
 }
 function initSDK() {
     ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
-    ZegoExpressManager.shared.onRoomUserUpdate((roomID, updateType, userList) => {
-        userList.forEach(user => {
+    ZegoExpressManager.shared.onRoomUserUpdate((updateType, userList, roomID) => {
+        userList.forEach(userID => {
             if (updateType === 'ADD') {
                 console.warn("roomUserUpdate");
-                ZegoExpressManager.shared.setRemoteVideoView(user.userID, renderView2)
+                const videoDom = ZegoExpressManager.shared.getRemoteVideoView(userID)
+                renderView2.appendChild(videoDom);
+            } else {
+                renderView2.innerHTML = '';
             }
         });
     })
@@ -53,7 +56,8 @@ async function checkMicrophone() {
 async function joinRoom() {
     const token = (await generateToken()).data.token
     await ZegoExpressManager.shared.joinRoom(config.roomID, token, { userID: config.userID, userName: config.userName });
-    ZegoExpressManager.shared.setLocalVideoView(renderView1)
+    const videoDom = ZegoExpressManager.shared.getLocalVideoView()
+    renderView1.appendChild(videoDom);
     alert('join success');
 }
 function enableCamera() {
@@ -68,5 +72,7 @@ function enableMic() {
 }
 function leaveRoom() {
     ZegoExpressManager.shared.leaveRoom();
+    renderView1.innerHTML = '';
+    renderView2.innerHTML = '';
     alert('leave success');
 }

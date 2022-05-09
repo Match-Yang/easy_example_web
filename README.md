@@ -57,7 +57,7 @@ npm run build
 ### Method call
 
 The calling sequence of the SDK interface is as follows:
-createEngine --> onRoomUserUpdate、onRoomUserDeviceUpdate、onRoomTokenWillExpire --> checkWebRTC --> checkCamera --> checkMicrophone --> joinRoom --> setLocalVideoView/setRemoteVideoView --> leaveRoom
+createEngine --> onRoomUserUpdate、onRoomUserDeviceUpdate、onRoomTokenWillExpire --> checkWebRTC --> checkCamera --> checkMicrophone --> joinRoom --> getLocalVideoView/getRemoteVideoView --> leaveRoom
 
 #### Create engine
 
@@ -125,33 +125,35 @@ The following sample code is an example of a call scenario, options can not be p
 ZegoExpressManager.shared.joinRoom(config.roomID, token, { userID: config.userID, userName: config.userName });
 ```
 
-#### Set video view
+#### Get video view
 
-If your project needs to use the video communication function, you need to set the View for displaying the video, call `setLocalVideoView` for the local video, and call `setRemoteVideoView` for the remote video.
+If your project needs to use the video communication function, you need to get the View for displaying the video, call `getLocalVideoView` for the local video, and call `getRemoteVideoView` for the remote video.
 
-**setLocalVideoView:**
+**getLocalVideoView:**
 
 ```html
-<video id="video-con1" autoplay muted></video>
+<div id="video-con1"></div>
 ```
 
 ```typescript
 const renderView1 = document.querySelector('#video-con1');
-ZegoExpressManager.shared.setLocalVideoView(renderView1);
+const videoDom = ZegoExpressManager.shared.getLocalVideoView();
+renderView1.appendChild(videoDom);
 ```
 
-**setRemoteVideoView:**
+**getRemoteVideoView:**
 
 ```html
-<video id="video-con2" autoplay></video>
+<div id="video-con2"></div>
 ```
 
 ```typescript
+const renderView2 = document.querySelector('#video-con2');
 ZegoExpressManager.shared.onRoomUserUpdate((roomID, updateType, userList) => {
-    userList.forEach((user) => {
+    userList.forEach(userID => {
         if (updateType === 'ADD') {
-            const renderView2 = document.querySelector('#video-con2');
-            ZegoExpressManager.shared.setRemoteVideoView(user.userID, renderView2);
+            const videoDom = ZegoExpressManager.shared.getRemoteVideoView(userID);
+            renderView2.appendChild(videoDom);
         }
     });
 });
@@ -164,3 +166,20 @@ When you want to leave the room, you can call the leaveroom interface.
 ```typescript
 ZegoExpressManager.shared.leaveRoom();
 ```
+
+## Change Log
+
+### 2022-05-09
+
+#### Code optimization
+
+1. Replace the original getLocalVideoView and setRemoteVideoView with getLocalVideoView and getRemoteVideoView. Automatically create video tag in ZegoExpressManager.
+2. Destroy the local stream when leaving the room.
+3. Replace server with serverURL to align the console.
+
+#### Bug Fixes
+
+1. Empty the local video view container when exiting the room.
+2. Clear the remote video view container when other members exit the room.
+3. Adapt the options parameter of the flutter platform to the joinRoom interface.
+4. Increase the judgment of whether it is empty for renderView.

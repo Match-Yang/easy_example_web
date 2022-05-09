@@ -6,6 +6,7 @@ import {
   ZegoStreamList,
 } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
 import {
+  ZegoVideoViewType,
   ZegoDeviceUpdateType,
   ZegoMediaOptions,
   ZegoParticipant,
@@ -84,8 +85,15 @@ export class ZegoExpressManager {
       return Promise.resolve(false);
     }
     this.roomID = roomID;
-    options && (this.mediaOptions = options);
-
+    if (options) {
+      options = this.transFlutterData(options) as ZegoMediaOptions[];
+      this.mediaOptions = options.map((e) =>
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        typeof e === "object" ? e.index : e
+      );
+    }
+    user = this.transFlutterData(user) as ZegoUser;
     this.localParticipant.userID = user.userID;
     this.localParticipant.name = user.userName;
     this.localParticipant.streamID = this.generateStreamID(user.userID, roomID);
@@ -122,6 +130,13 @@ export class ZegoExpressManager {
               source
             );
             this.streamMap.set(this.localParticipant.streamID, localStream);
+            // Determine if srcObject has been updated
+            if (
+              this.localParticipant.renderView &&
+              !this.localParticipant.renderView.srcObject
+            ) {
+              this.localParticipant.renderView.srcObject = localStream;
+            }
             await ZegoExpressManager.engine.startPublishingStream(
               this.localParticipant.streamID,
               localStream
@@ -152,30 +167,39 @@ export class ZegoExpressManager {
     result && (this.localParticipant.mic = enable);
     return result;
   }
-  setLocalVideoView(renderView: HTMLMediaElement) {
+  getLocalVideoView(): HTMLMediaElement {
     if (!this.roomID) {
       console.error(
-        "Error: [setVideoView] You need to join the room first and then set the videoView"
+        "Error: [getVideoView] You need to join the room first and then set the videoView"
       );
     }
     const { streamID, userID } = this.localParticipant;
+    const renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
     const streamObj = this.streamMap.get(streamID) as MediaStream;
-    renderView.srcObject = streamObj;
+    if (streamObj) {
+      // Render now
+      renderView.srcObject = streamObj;
+    } else {
+      // Delay rendering until stream is created successfully
+    }
     this.localParticipant.renderView = renderView;
     this.participantDic.set(userID, this.localParticipant);
     this.streamDic.set(streamID, this.localParticipant);
+
+    return renderView;
   }
-  setRemoteVideoView(userID: string, renderView: HTMLMediaElement) {
+  getRemoteVideoView(userID: string): HTMLMediaElement {
     if (!this.roomID) {
       console.error(
-        "Error: [setVideoView] You need to join the room first and then set the videoView"
+        "Error: [getVideoView] You need to join the room first and then set the videoView"
       );
     }
     if (!userID) {
       console.error(
-        "Error: [setVideoView] userID is empty, please enter a right userID"
+        "Error: [getVideoView] userID is empty, please enter a right userID"
       );
     }
+    const renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
     const participant = this.participantDic.get(userID) as ZegoParticipant;
     participant.renderView = renderView;
     this.participantDic.set(userID, participant);
@@ -186,35 +210,51 @@ export class ZegoExpressManager {
       // inner roomUserUpdate -> out roomUserUpdate -> inner roomStreamUpdate
     }
     this.renderViewHandle(userID);
+    return renderView;
   }
   leaveRoom() {
     ZegoExpressManager.engine.stopPublishingStream(
       this.localParticipant.streamID
     );
+    ZegoExpressManager.engine.destroyStream(
+      this.streamMap.get(this.localParticipant.streamID) as MediaStream
+    );
     this.streamMap.forEach((streamObj, streamID) => {
       ZegoExpressManager.engine.stopPlayingStream(streamID);
-      (this.streamDic.get(streamID) as ZegoParticipant).renderView.srcObject =
-        null;
+      (this.streamDic.get(streamID) as ZegoParticipant).renderView &&
+        ((
+          this.streamDic.get(streamID) as ZegoParticipant
+        ).renderView.srcObject = null);
     });
     this.participantDic.clear();
     this.streamDic.clear();
     this.streamMap.clear();
     this.roomID = "";
-    this.localParticipant.renderView.srcObject = null;
+    this.localParticipant.renderView &&
+      (this.localParticipant.renderView.srcObject = null);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    this.localParticipant = null;
+    this.localParticipant = {};
 
     return ZegoExpressManager.engine.logoutRoom();
   }
   onRoomUserUpdate(
     fun: (
-      roomID: string,
       updateType: "DELETE" | "ADD",
-      userList: ZegoUser[]
+      userList: string[],
+      roomID: string
     ) => void
   ) {
-    return ZegoExpressManager.engine.on("roomUserUpdate", fun);
+    return ZegoExpressManager.engine.on(
+      "roomUserUpdate",
+      (roomID: string, updateType: "DELETE" | "ADD", userList: ZegoUser[]) => {
+        const userIDList: string[] = [];
+        userList.forEach((user: ZegoUser) => {
+          userIDList.push(user.userID);
+        });
+        fun(updateType, userIDList, roomID);
+      }
+    );
   }
   onRoomUserDeviceUpdate(
     fun: (
@@ -260,8 +300,20 @@ export class ZegoExpressManager {
 
     // The streamID can use any character.
     // For the convenience of query, roomID + UserID + suffix is used here.
-    const streamID = roomID + "_" + userID + "_main_web";
+    const streamID = roomID + userID + "_main";
     return streamID;
+  }
+  private generateVideoView(
+    type: ZegoVideoViewType,
+    userID: string
+  ): HTMLMediaElement {
+    const mediaDom = document.createElement("video");
+    mediaDom.id = "zego-video-" + userID;
+    mediaDom.autoplay = true;
+    if (type === ZegoVideoViewType.Local) {
+      mediaDom.muted = true;
+    }
+    return mediaDom;
   }
   private onOtherEvent() {
     ZegoExpressManager.engine.on(
@@ -321,7 +373,8 @@ export class ZegoExpressManager {
             ZegoExpressManager.engine.stopPlayingStream(stream.streamID);
             this.streamMap.delete(stream.streamID);
             this.streamDic.delete(stream.streamID);
-            (participant as ZegoParticipant).renderView.srcObject = null;
+            (participant as ZegoParticipant).renderView &&
+              ((participant as ZegoParticipant).renderView.srcObject = null);
           }
         });
       }
@@ -397,5 +450,8 @@ export class ZegoExpressManager {
       const streamObj = this.streamMap.get(participant.streamID);
       participant.renderView.srcObject = streamObj as MediaStream;
     }
+  }
+  private transFlutterData<T>(data: T | string): T | string {
+    return typeof data === "string" ? JSON.parse(data) : data;
   }
 }

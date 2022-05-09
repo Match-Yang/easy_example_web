@@ -19,14 +19,16 @@ export declare class ZegoExpressManager {
     joinRoom(roomID: string, token: string, user: ZegoUser, options?: ZegoMediaOptions[]): Promise<boolean>;
     enableCamera(enable: boolean): boolean;
     enableMic(enable: boolean): boolean;
-    setLocalVideoView(renderView: HTMLMediaElement): void;
-    setRemoteVideoView(userID: string, renderView: HTMLMediaElement): void;
+    getLocalVideoView(): HTMLMediaElement;
+    getRemoteVideoView(userID: string): HTMLMediaElement;
     leaveRoom(): void;
-    onRoomUserUpdate(fun: (roomID: string, updateType: "DELETE" | "ADD", userList: ZegoUser[]) => void): boolean;
+    onRoomUserUpdate(fun: (updateType: "DELETE" | "ADD", userList: string[], roomID: string) => void): boolean;
     onRoomUserDeviceUpdate(fun: (updateType: ZegoDeviceUpdateType, userID: string, roomID: string) => void): boolean;
     onRoomTokenWillExpire(fun: (roomID: string) => void): boolean;
     private playStream;
     private generateStreamID;
+    private generateVideoView;
     private onOtherEvent;
     private renderViewHandle;
+    private transFlutterData;
 }

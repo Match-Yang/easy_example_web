@@ -38,3 +38,7 @@ export interface ZegoParticipant {
     publishVideoQuality: ZegoStreamQualityLevel;
     publishAudioQuality: ZegoStreamQualityLevel;
 }
+export declare enum ZegoVideoViewType {
+    Local = 0,
+    Remote = 1
+}
