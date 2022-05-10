@@ -199,7 +199,7 @@ export class ZegoExpressManager {
         "Error: [getVideoView] userID is empty, please enter a right userID"
       );
     }
-    const renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
+    const renderView = this.generateVideoView(ZegoVideoViewType.Remote, userID);
     const participant = this.participantDic.get(userID) as ZegoParticipant;
     participant.renderView = renderView;
     this.participantDic.set(userID, participant);
