@@ -1,68 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Example</title>
-</head>
-<style>
-    html, body {
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        margin: 0;
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZEGOCLOUD EasyExample Home</title>
+  </head>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
     }
-    video {
-        width: 100%;
-        height: 100%;
+    .user {
+      text-align: center;
+      border: 0px solid #ddd;
+      padding-top: 40vh;
+      color: #646a73;
+      font-size: 14px;
     }
-    #video-con1 {
-        display: inline-block;
-        border: 1px solid #ddd;
-        box-sizing: border-box;
-        background: #c2c2c2;
+    .line {
+      width: 300px;
+      margin: auto;
+      text-align: left;
+      margin-top: 30px;
     }
-    #video-con2 {
-        display: inline-block;
-        border: 1px solid #ddd;
-        background: #ddd;
-        box-sizing: border-box;
-        width: 40%;
-        height: 40%;
+    .user button {
+      background-color: #007aff;
+      margin-left: 20px;
+      border: 0px;
+      height: 32px;
+      border-radius: 5%;
+      color: white;
     }
-    @media screen and (min-width: 901px) {
-        #video-con1 {
-            width: 40%;
-            height: 40%;
-        }
+    .user input {
+      border: 0px;
+      border-bottom: 2px solid gray;
+      height: 32px;
+      width: 155px;
     }
-    @media screen and (max-width: 900px) {
-        #video-con1 {
-            width: 100%;
-            height: 70%;
-        }
-        #video-con2 {
-            position: fixed;
-            top: 0px;
-            right: 0px;
-        }
-    }
-</style>
-<body>
-    <div id="video-con1"></div>
-    <div id="video-con2"></div>
-    <div>
-        <button onclick="initSDK()">init SDK</button>
-        <button onclick="checkWebRTC()">checkWebRTC</button>
-        <button onclick="checkCamera()">checkCamera</button>
-        <button onclick="checkMicrophone()">checkMicrophone</button>
-        <button onclick="joinRoom()">joinRoom</button>
-        <button onclick="enableCamera()">enableCamera</button>
-        <button onclick="enableMic()">enableMic</button>
-        <button onclick="leaveRoom()">leaveRoom</button>
+  </style>
+  <body>
+    <div class="user">
+      <div class="line">
+        <label>userID:</label>
+        <span id="userID">xxxx</span>
+      </div>
+      <div class="line">
+        <input
+          placeholder="Please enter target userID"
+          id="userID2"
+          title="The other user can receive offline messages after subscribing"
+        /><button onClick="goCall()">Call</button>
+      </div>
     </div>
-    <script src="./ZegoExpressManager.js"></script>
-    <script src="./index.js"></script>
-</body>
+  </body>
+  <script src="./ZegoExpressManager.js"></script>
+  <script>
+    var config = {
+      appID: 1719562607,
+      serverURL: "wss://webliveroom" + 1719562607 + "-api.zegocloud.com/ws",
+      tokenServerUrl: "https://easy-example-call.herokuapp.com",
+    };
+    async function checkRequirements() {
+      ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
+      var isSupportRTC = await ZegoExpressManager.shared.checkWebRTC();
+      var isCameraValid = await ZegoExpressManager.shared.checkCamera();
+      var isMicValid = await ZegoExpressManager.shared.checkMicrophone();
+      // !isSupportRTC && alert("This browser does not support WebRTC");
+      // !isCameraValid && alert("This browser camera unavailable");
+      // !isMicValid && alert("This browser microphone unavailable");
+    }
+
+    var randomS = function (len) {
+      var chars =
+          "12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP",
+        maxPos = chars.length,
+        result = "",
+        i;
+      len = len || 5;
+      for (i = 0; i < len; i++) {
+        result += chars.charAt(Math.floor(Math.random() * maxPos));
+      }
+      return result;
+    };
+
+    window.onload = function () {
+      document.querySelector("#userID").innerHTML = randomS(10);
+      checkRequirements();
+      subscribe();
+    };
+
+    async function goCall() {
+      if (document.querySelector("#userID2").value) {
+        await sendMessage();
+        // window.location.href =
+        //   "./call.html?roomID=" +
+        //   document.querySelector("#userID2").value +
+        //   "&userID=" +
+        //   document.querySelector("#userID").innerHTML;
+      } else {
+        setTimeout(function () {
+          document.querySelector("#userID2").focus();
+        }, 500);
+      }
+    }
+  </script>
+
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.0/firebase-app.js";
+    import {
+      getMessaging,
+      onMessage,
+      getToken,
+    } from "https://www.gstatic.com/firebasejs/9.8.0/firebase-messaging.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyASiPspPxaPd-cwcLreUJ9JL5REprJd2To",
+      authDomain: "easyexample-7c37e.firebaseapp.com",
+      projectId: "easyexample-7c37e",
+      storageBucket: "easyexample-7c37e.appspot.com",
+      messagingSenderId: "17907117774",
+      appId: "1:17907117774:web:154c5b5a07a83208d4ea9f",
+      measurementId: "G-JK09KKQ2XW",
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+
+    // Handle incoming messages. Called when:
+    // - a message is received while the app has focus
+    // - the user clicks on an app notification created by a service worker
+    //   `messaging.onBackgroundMessage` handler.
+    onMessage(messaging, (payload) => {
+      console.warn("Message received. ", payload);
+      // Update the UI to include the received message.
+    });
+
+    window.subscribe = function () {
+      getToken(messaging, {
+        vapidKey:
+          "BFexwH4yF5B9rDdfdEYpoBFAFntYi6omwh4x5FTnZ-CiB24uW2og3J9gRI0LwTDdEWKssnP5b1QDQBeP0xQnj9I",
+      })
+        .then((currentToken) => {
+          if (currentToken) {
+            if (window.localStorage.getItem("web_push_token")) {
+              sendTokenToMyServer(currentToken);
+            } else {
+              window.localStorage.setItem("web_push_token", currentToken);
+            }
+          } else {
+            // Show permission request.
+            console.log(
+              "No registration token available. Request permission to generate one."
+            );
+            // Show permission UI.
+            requestPermission();
+          }
+        })
+        .catch((err) => {
+          console.log("An error occurred while retrieving token. ", err);
+        });
+    };
+
+    function sendTokenToMyServer(token) {
+      return fetch(`${config.tokenServerUrl}/store_fcm_token`, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userID: document.querySelector("#userID").innerHTML,
+          token,
+        }),
+      }).then((res) => {
+        // console.log(res.json());
+      });
+    }
+
+    function requestPermission() {
+      console.log("Requesting permission...");
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Notification permission granted.");
+          // TODO(developer): Retrieve a registration token for use with FCM.
+          // In many cases once an app has been granted notification permission,
+          // it should update its UI reflecting this.
+          getToken();
+        } else {
+          console.log("Unable to get permission to notify.");
+        }
+      });
+    }
+
+    window.sendMessage = function () {
+      return fetch(`${config.tokenServerUrl}/call_invite`, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          targetUserID: document.querySelector("#userID2").value,
+          callerUserID: document.querySelector("#userID").innerHTML,
+          callerUserName: document.querySelector("#userID").innerHTML,
+          callerIconUrl: "",
+          roomID: document.querySelector("#userID").innerHTML,
+        }),
+      }).then((res) => {
+        console.log(res);
+        console.log(res.json());
+      });
+    };
+  </script>
 </html>
