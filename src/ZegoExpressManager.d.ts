@@ -1,4 +1,5 @@
 import { ZegoExpressEngine } from "zego-express-engine-webrtc";
+import { ZegoRoomExtraInfo } from "zego-express-engine-webrtm/sdk/code/zh/ZegoExpressEntity";
 import { ZegoDeviceUpdateType, ZegoMediaOptions, ZegoUser } from "./ZegoExpressManager.entity";
 export declare class ZegoExpressManager {
     private participantDic;
@@ -8,6 +9,8 @@ export declare class ZegoExpressManager {
     private streamMap;
     private mediaOptions;
     private deviceUpdateCallback;
+    private isPublish;
+    private roomExtraInfo;
     static shared: ZegoExpressManager;
     static engine: ZegoExpressEngine;
     private constructor();
@@ -16,19 +19,24 @@ export declare class ZegoExpressManager {
     checkWebRTC(): Promise<boolean>;
     checkCamera(): Promise<boolean>;
     checkMicrophone(): Promise<boolean>;
-    joinRoom(roomID: string, token: string, user: ZegoUser, options?: ZegoMediaOptions[]): Promise<boolean>;
+    joinRoom(roomID: string, token: string, user: ZegoUser, options: ZegoMediaOptions[]): Promise<boolean>;
     enableCamera(enable: boolean): boolean;
     enableMic(enable: boolean): boolean;
     getLocalVideoView(): HTMLMediaElement;
     getRemoteVideoView(userID: string): HTMLMediaElement;
+    setRoomExtraInfo(key: string, value: string): Promise<boolean>;
     leaveRoom(): void;
     onRoomUserUpdate(fun: (updateType: "DELETE" | "ADD", userList: string[], roomID: string) => void): boolean;
     onRoomUserDeviceUpdate(fun: (updateType: ZegoDeviceUpdateType, userID: string, roomID: string) => void): boolean;
     onRoomTokenWillExpire(fun: (roomID: string) => void): boolean;
+    onRoomExtraInfoUpdate(fun: (roomExtraInfoList: ZegoRoomExtraInfo[]) => void): boolean;
+    onRoomStateUpdate(fun: (state: "DISCONNECTED" | "CONNECTING" | "CONNECTED") => void): boolean;
     private playStream;
     private generateStreamID;
     private generateVideoView;
     private onOtherEvent;
     private renderViewHandle;
     private transFlutterData;
+    private triggerStreamHandle;
+    private triggerPreview;
 }

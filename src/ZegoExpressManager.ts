@@ -5,6 +5,7 @@ import {
   ZegoPublishStats,
   ZegoStreamList,
 } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
+import { ZegoRoomExtraInfo } from "zego-express-engine-webrtm/sdk/code/zh/ZegoExpressEntity";
 import {
   ZegoVideoViewType,
   ZegoDeviceUpdateType,
@@ -22,17 +23,14 @@ export class ZegoExpressManager {
   private localParticipant!: ZegoParticipant;
   private roomID = "";
   private streamMap: Map<string, MediaStream> = new Map();
-  private mediaOptions: ZegoMediaOptions[] = [
-    ZegoMediaOptions.AutoPlayAudio,
-    ZegoMediaOptions.AutoPlayVideo,
-    ZegoMediaOptions.PublishLocalAudio,
-    ZegoMediaOptions.PublishLocalVideo,
-  ];
+  private mediaOptions: ZegoMediaOptions[] = [];
   private deviceUpdateCallback: ((
     updateType: ZegoDeviceUpdateType,
     userID: string,
     roomID: string
   ) => void)[] = [];
+  private isPublish = false;
+  private roomExtraInfo!: ZegoRoomExtraInfo;
   static shared: ZegoExpressManager = new ZegoExpressManager();
   static engine: ZegoExpressEngine;
   private constructor() {
@@ -76,23 +74,27 @@ export class ZegoExpressManager {
     roomID: string,
     token: string,
     user: ZegoUser,
-    options?: ZegoMediaOptions[]
+    options: ZegoMediaOptions[]
   ): Promise<boolean> {
     if (!token) {
       console.error(
-        "Error: [joinRoom] token is empty, please enter a right token"
+        "[ZEGOCLOUD LOG][Manager][joinRoom] - Token is empty, please enter a right token"
+      );
+      return Promise.resolve(false);
+    }
+    if (!options) {
+      console.error(
+        "[ZEGOCLOUD LOG][Manager][joinRoom] - Options is empty, please enter a right options"
       );
       return Promise.resolve(false);
     }
     this.roomID = roomID;
-    if (options) {
-      options = this.transFlutterData(options) as ZegoMediaOptions[];
-      this.mediaOptions = options.map((e) =>
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        typeof e === "object" ? e.index : e
-      );
-    }
+    options = this.transFlutterData(options) as ZegoMediaOptions[];
+    this.mediaOptions = options.map((e) =>
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      typeof e === "object" ? e.index : e
+    );
     user = this.transFlutterData(user) as ZegoUser;
     this.localParticipant.userID = user.userID;
     this.localParticipant.name = user.userName;
@@ -112,24 +114,30 @@ export class ZegoExpressManager {
       .loginRoom(roomID, token, user, config)
       .then(async (result) => {
         if (result) {
+          console.warn("[ZEGOCLOUD LOG][Manager][loginRoom] - Login success");
+          const source = {
+            camera: {
+              audio: true,
+              video: true,
+              facingMode: "user" as "user" | "environment",
+            },
+          };
+          const localStream = await ZegoExpressManager.engine.createStream(
+            source
+          );
+          console.warn(
+            "[ZEGOCLOUD LOG][Manager][createStream] - Create success"
+          );
+          this.streamMap.set(this.localParticipant.streamID, localStream);
+
           this.localParticipant.camera = this.mediaOptions.includes(
             ZegoMediaOptions.PublishLocalVideo
           );
           this.localParticipant.mic = this.mediaOptions.includes(
             ZegoMediaOptions.PublishLocalAudio
           );
+
           if (this.localParticipant.camera || this.localParticipant.mic) {
-            const source = {
-              camera: {
-                audio: this.localParticipant.mic,
-                video: this.localParticipant.camera,
-                facingMode: "user" as "user" | "environment",
-              },
-            };
-            const localStream = await ZegoExpressManager.engine.createStream(
-              source
-            );
-            this.streamMap.set(this.localParticipant.streamID, localStream);
             // Determine if srcObject has been updated
             if (
               this.localParticipant.renderView &&
@@ -137,10 +145,32 @@ export class ZegoExpressManager {
             ) {
               this.localParticipant.renderView.srcObject = localStream;
             }
-            await ZegoExpressManager.engine.startPublishingStream(
+            ZegoExpressManager.engine.mutePublishStreamAudio(
+              localStream,
+              !this.localParticipant.mic
+            );
+            ZegoExpressManager.engine.mutePublishStreamVideo(
+              localStream,
+              !this.localParticipant.camera
+            );
+            console.warn(
+              "[ZEGOCLOUD LOG][Manager][mutePublishStreamAudio] - Mute success",
+              !this.localParticipant.mic
+            );
+            console.warn(
+              "[ZEGOCLOUD LOG][Manager][mutePublishStreamVideo] - Mute success",
+              !this.localParticipant.camera
+            );
+            const result = ZegoExpressManager.engine.startPublishingStream(
               this.localParticipant.streamID,
               localStream
             );
+            if (result) {
+              console.warn(
+                "[ZEGOCLOUD LOG][Manager][startPublishingStream] - Publish success"
+              );
+              this.isPublish = true;
+            }
           }
         }
         return result;
@@ -154,7 +184,14 @@ export class ZegoExpressManager {
       !enable
     );
 
-    result && (this.localParticipant.camera = enable);
+    if (result) {
+      console.warn(
+        "[ZEGOCLOUD LOG][Manager][mutePublishStreamVideo] - Mute success",
+        !enable
+      );
+      this.localParticipant.camera = enable;
+      this.triggerStreamHandle("camera", enable);
+    }
     return result;
   }
   enableMic(enable: boolean): boolean {
@@ -164,17 +201,27 @@ export class ZegoExpressManager {
       streamObj,
       !enable
     );
-    result && (this.localParticipant.mic = enable);
+    if (result) {
+      console.warn(
+        "[ZEGOCLOUD LOG][Manager][mutePublishStreamAudio] - Mute success",
+        !enable
+      );
+      this.localParticipant.mic = enable;
+      this.triggerStreamHandle("mic", enable);
+    }
     return result;
   }
   getLocalVideoView(): HTMLMediaElement {
     if (!this.roomID) {
       console.error(
-        "Error: [getVideoView] You need to join the room first and then set the videoView"
+        "[ZEGOCLOUD LOG][Manager][getLocalVideoView] - You need to join the room first and then get the videoView"
       );
     }
     const { streamID, userID } = this.localParticipant;
-    const renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
+    let renderView = this.localParticipant.renderView;
+    if (!renderView) {
+      renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
+    }
     const streamObj = this.streamMap.get(streamID) as MediaStream;
     if (streamObj) {
       // Render now
@@ -191,17 +238,21 @@ export class ZegoExpressManager {
   getRemoteVideoView(userID: string): HTMLMediaElement {
     if (!this.roomID) {
       console.error(
-        "Error: [getVideoView] You need to join the room first and then set the videoView"
+        "[ZEGOCLOUD LOG][Manager][getRemoteVideoView] - You need to join the room first and then get the videoView"
       );
     }
     if (!userID) {
       console.error(
-        "Error: [getVideoView] userID is empty, please enter a right userID"
+        "[ZEGOCLOUD LOG][Manager][getRemoteVideoView] - UserID is empty, please enter a right userID"
       );
     }
-    const renderView = this.generateVideoView(ZegoVideoViewType.Local, userID);
     const participant = this.participantDic.get(userID) as ZegoParticipant;
-    participant.renderView = renderView;
+    if (!participant.renderView) {
+      participant.renderView = this.generateVideoView(
+        ZegoVideoViewType.Remote,
+        userID
+      );
+    }
     this.participantDic.set(userID, participant);
     if (participant.streamID) {
       // inner roomStreamUpdate -> inner roomUserUpdate -> out roomUserUpdate
@@ -210,9 +261,34 @@ export class ZegoExpressManager {
       // inner roomUserUpdate -> out roomUserUpdate -> inner roomStreamUpdate
     }
     this.renderViewHandle(userID);
-    return renderView;
+    return participant.renderView;
+  }
+  setRoomExtraInfo(key: string, value: string): Promise<boolean> {
+    // Currently, only one key-value pair is allowed for room additional messages.
+    // The maximum length of key is 10 bytes, and the maximum length of value is 100 bytes.
+    return ZegoExpressManager.engine
+      .setRoomExtraInfo(this.roomID, key, value)
+      .then((result) => {
+        if (result.errorCode === 0) {
+          console.warn(
+            "[ZEGOCLOUD LOG][Manager][setRoomExtraInfo] - Set success"
+          );
+          // const { userID, name: userName } = this.localParticipant;
+          // this.roomExtraInfo = {
+          //   key,
+          //   value,
+          //   updateUser: { userID, userName },
+          //   updateTime: new Date().getTime(),
+          // };
+        }
+        return result.errorCode === 0;
+      });
   }
   leaveRoom() {
+    console.warn(
+      "[ZEGOCLOUD LOG][Manager][leaveRoom] - Stop publishing stream"
+    );
+    console.warn("[ZEGOCLOUD LOG][Manager][leaveRoom] - Destroy Stream");
     ZegoExpressManager.engine.stopPublishingStream(
       this.localParticipant.streamID
     );
@@ -220,6 +296,10 @@ export class ZegoExpressManager {
       this.streamMap.get(this.localParticipant.streamID) as MediaStream
     );
     this.streamMap.forEach((streamObj, streamID) => {
+      console.warn(
+        "[ZEGOCLOUD LOG][Manager][leaveRoom] - Stop playing stream",
+        streamID
+      );
       ZegoExpressManager.engine.stopPlayingStream(streamID);
       (this.streamDic.get(streamID) as ZegoParticipant).renderView &&
         ((
@@ -248,6 +328,12 @@ export class ZegoExpressManager {
     return ZegoExpressManager.engine.on(
       "roomUserUpdate",
       (roomID: string, updateType: "DELETE" | "ADD", userList: ZegoUser[]) => {
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][onRoomUserUpdate]",
+          roomID,
+          updateType,
+          userList
+        );
         const userIDList: string[] = [];
         userList.forEach((user: ZegoUser) => {
           userIDList.push(user.userID);
@@ -269,11 +355,43 @@ export class ZegoExpressManager {
   onRoomTokenWillExpire(fun: (roomID: string) => void) {
     return ZegoExpressManager.engine.on("tokenWillExpire", fun);
   }
+  onRoomExtraInfoUpdate(fun: (roomExtraInfoList: ZegoRoomExtraInfo[]) => void) {
+    return ZegoExpressManager.engine.on(
+      "roomExtraInfoUpdate",
+      (roomID: string, roomExtraInfoList: ZegoRoomExtraInfo[]) => {
+        // this.roomExtraInfo = roomExtraInfoList[0];
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][onRoomExtraInfoUpdate]",
+          roomID,
+          roomExtraInfoList
+        );
+        fun(roomExtraInfoList);
+      }
+    );
+  }
+  onRoomStateUpdate(
+    fun: (state: "DISCONNECTED" | "CONNECTING" | "CONNECTED") => void
+  ) {
+    return ZegoExpressManager.engine.on(
+      "roomStateUpdate",
+      (roomID: string, state: "DISCONNECTED" | "CONNECTING" | "CONNECTED") => {
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][onRoomStateUpdate]",
+          roomID,
+          state
+        );
+        fun(state);
+      }
+    );
+  }
   private async playStream(stream: ZegoStreamList) {
     if (
       this.mediaOptions.includes(ZegoMediaOptions.AutoPlayAudio) ||
       this.mediaOptions.includes(ZegoMediaOptions.AutoPlayVideo)
     ) {
+      console.warn(
+        "[ZEGOCLOUD LOG][Manager][playStream] - Start playing stream"
+      );
       const playOption = {
         audio: this.mediaOptions.includes(ZegoMediaOptions.AutoPlayAudio),
         video: this.mediaOptions.includes(ZegoMediaOptions.AutoPlayVideo),
@@ -289,12 +407,12 @@ export class ZegoExpressManager {
   private generateStreamID(userID: string, roomID: string): string {
     if (!userID) {
       console.error(
-        "Error: [generateStreamID] userID is empty, please enter a right userID"
+        "[ZEGOCLOUD LOG][Manager][generateStreamID] - UserID is empty, please enter a right userID"
       );
     }
     if (!roomID) {
       console.error(
-        "Error: [generateStreamID] roomID is empty, please enter a right roomID"
+        "[ZEGOCLOUD LOG][Manager][generateStreamID] - RoomID is empty, please enter a right roomID"
       );
     }
 
@@ -313,12 +431,25 @@ export class ZegoExpressManager {
     if (type === ZegoVideoViewType.Local) {
       mediaDom.muted = true;
     }
+    console.warn(
+      "[ZEGOCLOUD LOG][Manager][generateVideoView]",
+      type,
+      userID,
+      mediaDom
+    );
+
     return mediaDom;
   }
   private onOtherEvent() {
     ZegoExpressManager.engine.on(
       "roomUserUpdate",
       (roomID: string, updateType: "DELETE" | "ADD", userList: ZegoUser[]) => {
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][roomUserUpdate]",
+          roomID,
+          updateType,
+          userList
+        );
         userList.forEach((user) => {
           if (updateType === "ADD") {
             const participant = this.participantDic.get(user.userID);
@@ -344,6 +475,12 @@ export class ZegoExpressManager {
         updateType: "DELETE" | "ADD",
         streamList: ZegoStreamList[]
       ) => {
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][roomStreamUpdate]",
+          roomID,
+          updateType,
+          streamList
+        );
         streamList.forEach((stream) => {
           const participant = this.participantDic.get(stream.user.userID);
           if (updateType === "ADD") {
@@ -382,7 +519,6 @@ export class ZegoExpressManager {
     ZegoExpressManager.engine.on(
       "publishQualityUpdate",
       (streamID: string, stats: ZegoPublishStats) => {
-        // console.error("inner publishQualityUpdate");
         const participant = this.streamDic.get(streamID);
         if (!participant) return;
 
@@ -396,7 +532,6 @@ export class ZegoExpressManager {
     ZegoExpressManager.engine.on(
       "playQualityUpdate",
       (streamID: string, stats: ZegoPlayStats) => {
-        // console.error("inner playQualityUpdate");
         const participant = this.streamDic.get(streamID);
         if (!participant) return;
 
@@ -410,6 +545,11 @@ export class ZegoExpressManager {
     ZegoExpressManager.engine.on(
       "remoteCameraStatusUpdate",
       (streamID: string, status: "OPEN" | "MUTE") => {
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][remoteCameraStatusUpdate]",
+          streamID,
+          status
+        );
         const participant = this.streamDic.get(streamID);
         if (participant) {
           const updateType =
@@ -428,6 +568,11 @@ export class ZegoExpressManager {
     ZegoExpressManager.engine.on(
       "remoteMicStatusUpdate",
       (streamID: string, status: "OPEN" | "MUTE") => {
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][remoteMicStatusUpdate]",
+          streamID,
+          status
+        );
         const participant = this.streamDic.get(streamID);
         if (participant) {
           const updateType =
@@ -447,11 +592,62 @@ export class ZegoExpressManager {
   private renderViewHandle(userID: string) {
     const participant = this.participantDic.get(userID);
     if (participant && participant.streamID && participant.renderView) {
+      console.warn(
+        "[ZEGOCLOUD LOG][Manager][renderViewHandle] - Start render view"
+      );
       const streamObj = this.streamMap.get(participant.streamID);
       participant.renderView.srcObject = streamObj as MediaStream;
     }
   }
   private transFlutterData<T>(data: T | string): T | string {
     return typeof data === "string" ? JSON.parse(data) : data;
+  }
+  private triggerStreamHandle(type: "camera" | "mic", enable: boolean) {
+    const { streamID, camera, mic } = this.localParticipant;
+    const streamObj = this.streamMap.get(streamID) as MediaStream;
+    if (enable) {
+      if (!this.isPublish) {
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][triggerStreamHandle] - Start publishing stream"
+        );
+        ZegoExpressManager.engine.startPublishingStream(streamID, streamObj);
+        this.isPublish = true;
+        this.triggerPreview("start");
+      }
+    } else {
+      if (
+        ((type === "camera" && !mic) || (type === "mic" && !camera)) &&
+        !this.mediaOptions.includes(ZegoMediaOptions.PublishLocalAudio) &&
+        !this.mediaOptions.includes(ZegoMediaOptions.PublishLocalVideo)
+      ) {
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][triggerStreamHandle] - Stop publishing stream"
+        );
+        ZegoExpressManager.engine.stopPublishingStream(streamID);
+        this.isPublish = false;
+        this.triggerPreview("stop");
+      }
+    }
+  }
+  private triggerPreview(type: "start" | "stop") {
+    if (this.localParticipant.renderView) {
+      if (type === "stop") {
+        // Stop preview
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][triggerPreview] - Stop preview",
+          this.localParticipant.streamID
+        );
+        this.localParticipant.renderView.srcObject = null;
+      } else {
+        // Start preview
+        console.warn(
+          "[ZEGOCLOUD LOG][Manager][triggerPreview] - Start preview",
+          this.localParticipant.streamID
+        );
+        const streamID = this.localParticipant.streamID;
+        const streamObj = this.streamMap.get(streamID) as MediaStream;
+        this.localParticipant.renderView.srcObject = streamObj;
+      }
+    }
   }
 }

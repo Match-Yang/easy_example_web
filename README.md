@@ -57,7 +57,7 @@ npm run build
 ### Method call
 
 The calling sequence of the SDK interface is as follows:
-createEngine --> onRoomUserUpdate、onRoomUserDeviceUpdate、onRoomTokenWillExpire --> checkWebRTC --> checkCamera --> checkMicrophone --> joinRoom --> getLocalVideoView/getRemoteVideoView --> leaveRoom
+createEngine --> onRoomUserUpdate、onRoomUserDeviceUpdate、onRoomTokenWillExpire、onRoomExtraInfoUpdate、onRoomStateUpdate --> checkWebRTC --> checkCamera --> checkMicrophone --> joinRoom --> getLocalVideoView/getRemoteVideoView --> enableCamera、enableMic --> leaveRoom
 
 #### Create engine
 
@@ -79,6 +79,12 @@ ZegoExpressManager.shared.onRoomUserDeviceUpdate((updateType, userID, roomID) =>
     // Do something...
 });
 ZegoExpressManager.shared.onRoomTokenWillExpire((roomID) => {
+    // Do something...
+});
+ZegoExpressManager.shared.onRoomExtraInfoUpdate((roomExtraInfoList) => {
+    // Do something...
+});
+ZegoExpressManager.shared.onRoomStateUpdate((state) => {
     // Do something...
 });
 ```
@@ -113,16 +119,17 @@ When you want to communicate with audio and video, you need to call the join roo
 
 ZegoMediaOptions enumeration can be found in src/ZegoExpressManager.entity.ts.
 
-1. call scene: [ZegoMediaOptions.AutoPlayVideo, ZegoMediaOptions.AutoPlayAudio, ZegoMediaOptions.PublishLocalAudio, ZegoMediaOptions.PublishLocalVideo], the default is this scenario
-2. Live scene - host: [ZegoMediaOptions.AutoPlayVideo, ZegoMediaOptions.AutoPlayAudio, ZegoMediaOptions.PublishLocalAudio, ZegoMediaOptions.PublishLocalVideo]
-3. Live scene - audience:[ZegoMediaOptions.AutoPlayVideo, ZegoMediaOptions.AutoPlayAudio]
-4. Chat room - host: [ZegoMediaOptions.AutoPlayAudio, ZegoMediaOptions.PublishLocalAudio]
-5. Chat room - audience: [ZegoMediaOptions.AutoPlayAudio]
+1. Join Live As Host: [ZegoMediaOptions.AutoPlayVideo, ZegoMediaOptions.AutoPlayAudio, ZegoMediaOptions.PublishLocalAudio, ZegoMediaOptions.PublishLocalVideo]
+2. Join Live As Audience: [ZegoMediaOptions.AutoPlayVideo, ZegoMediaOptions.AutoPlayAudio]
 
-The following sample code is an example of a call scenario, options can not be passed by default:
+The following sample code is an example of a live scenario:
 
 ```typescript
-ZegoExpressManager.shared.joinRoom(config.roomID, token, { userID: config.userID, userName: config.userName });
+// Host
+ZegoExpressManager.shared.joinRoom(roomID, token, { userID: config.userID, userName: config.userName }, [1, 2, 4, 8]);
+
+// Audience
+ZegoExpressManager.shared.joinRoom(roomID, token, { userID: config.userID, userName: config.userName }, [1, 2]);
 ```
 
 #### Get video view
@@ -136,9 +143,10 @@ If your project needs to use the video communication function, you need to get t
 ```
 
 ```typescript
-const renderView1 = document.querySelector('#video-con1');
+const renderViewCon1 = document.querySelector('#video-con1');
 const videoDom = ZegoExpressManager.shared.getLocalVideoView();
-renderView1.appendChild(videoDom);
+renderViewCon1.innerHTML = ''; 
+renderViewCon1.appendChild(videoDom);
 ```
 
 **getRemoteVideoView:**
@@ -148,15 +156,28 @@ renderView1.appendChild(videoDom);
 ```
 
 ```typescript
-const renderView2 = document.querySelector('#video-con2');
+const renderViewCon2 = document.querySelector('#video-con2');
 ZegoExpressManager.shared.onRoomUserUpdate((roomID, updateType, userList) => {
     userList.forEach(userID => {
         if (updateType === 'ADD') {
             const videoDom = ZegoExpressManager.shared.getRemoteVideoView(userID);
-            renderView2.appendChild(videoDom);
+            renderViewCon2.innerHTML = '';
+            renderViewCon2.appendChild(videoDom);
         }
     });
 });
+```
+
+#### Enable camera
+
+```typescript
+ZegoExpressManager.shared.enableCamera(enable);
+```
+
+#### Enable mic
+
+```typescript
+ZegoExpressManager.shared.enableMic(enable);
 ```
 
 #### Leave room
@@ -169,17 +190,8 @@ ZegoExpressManager.shared.leaveRoom();
 
 ## Change Log
 
-### 2022-05-09
+### 2022-05-12
 
-#### Code Optimization
+#### New Features
 
-1. Replace the original getLocalVideoView and setRemoteVideoView with getLocalVideoView and getRemoteVideoView. Automatically create video tag in ZegoExpressManager.
-2. Destroy the local stream when leaving the room.
-3. Replace server with serverURL to align the console.
-
-#### Bug Fixes
-
-1. Empty the local video view container when exiting the room.
-2. Clear the remote video view container when other members exit the room.
-3. Adapt the options parameter of the flutter platform to the joinRoom interface.
-4. Increase the judgment of whether it is empty for renderView.
+1. Added live streaming scene with seat
