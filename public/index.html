@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Example</title>
-</head>
-<style>
-    html, body {
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        margin: 0;
+  </head>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
     }
     video {
-        width: 100%;
-        height: 100%;
+      width: 100%;
+      height: 100%;
     }
     #home-page.hide,
     #main-page.hide,
@@ -24,123 +25,127 @@
     #seat-con.hide,
     #camera-con.hide,
     #mic-con.hide {
-        display: none;
+      display: none;
     }
     #home-page {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     #home-page div {
-        margin-top: 20px;
-        margin-bottom: 20px;
+      margin-top: 20px;
+      margin-bottom: 20px;
     }
     #home-page div:nth-of-type(1) {
-        margin-top: 30px;
-        margin-bottom: 10px;
+      margin-top: 30px;
+      margin-bottom: 10px;
     }
     #home-page div:nth-of-type(2) {
-        margin-top: 8%;
-        margin-bottom: 40px;
+      margin-top: 8%;
+      margin-bottom: 40px;
     }
     #main-page {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
     }
     #video-con1 {
-        display: inline-block;
-        box-sizing: border-box;
-        background: cadetblue;
+      display: inline-block;
+      box-sizing: border-box;
+      background: cadetblue;
     }
     #video-con2 {
-        display: inline-block;
-        box-sizing: border-box;
-        width: 40%;
-        height: 40%;
-        background: wheat;
+      display: inline-block;
+      box-sizing: border-box;
+      width: 40%;
+      height: 40%;
+      background: wheat;
     }
     .operate-con {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        position: absolute;
-        bottom: 20px;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      bottom: 20px;
     }
     #seat-con,
     #camera-con,
     #mic-con,
     #leave-con {
-        margin: 0 10px;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #c2c2c2;
-        opacity: 0.9;
+      margin: 0 10px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #c2c2c2;
+      opacity: 0.9;
     }
     .operate-con img {
-        width: 80%;
-        height: 80%;
+      width: 80%;
+      height: 80%;
     }
     #leave-con img {
-        width: 60%;
-        height: 60%;
+      width: 60%;
+      height: 60%;
     }
     #seat-con img {
-        width: 50%;
-        height: 50%;
+      width: 50%;
+      height: 50%;
     }
     #video-con1 {
-        width: 100%;
-        height: 100%;
+      width: 100%;
+      height: 100%;
     }
     #video-con2 {
-        position: fixed;
-        top: 0px;
-        right: 0px;
+      position: fixed;
+      top: 0px;
+      right: 0px;
     }
-</style>
-<body>
+  </style>
+  <body>
     <div id="home-page">
-        <div>ZEGOCLOUD</div>
-        <div>
-            <input type="text" id="roomID" placeholder="roomID">
-        </div>
-        <div>
-            <button onclick="joinLiveAsHost()">Join Live As Host</button>
-        </div>
-        <div>
-            <button onclick="joinLiveAsAudience()">Join Live As Audience</button>
-        </div>
+      <div>ZEGOCLOUD</div>
+      <div>
+        <input type="text" id="roomID" placeholder="roomID" />
+      </div>
+      <div>
+        <button onclick="joinLiveAsHost()">Join Live As Host</button>
+      </div>
+      <div>
+        <button onclick="joinLiveAsAudience()">Join Live As Audience</button>
+      </div>
     </div>
     <div id="main-page" class="hide">
-        <div id="video-con1"></div>
-        <div id="video-con2" class="hide"></div>
-        <div class="operate-con">
-            <div id="leave-con">
-                <img onclick="leaveRoom()" src="./img/icon_phone.png" alt="phone">
-            </div>
-            <div id="camera-con">
-                <img onclick="enableCamera()" src="./img/icon_camera.png" alt="camera">
-            </div>
-            <div id="mic-con">
-                <img onclick="enableMic()" src="./img/icon_mic.png" alt="mic">
-            </div>
-            <div id="seat-con" class="hide">
-                <img onclick="seatHandle()" src="./img/icon_cohost.png" alt="seat">
-            </div>
+      <div id="video-con1"></div>
+      <div id="video-con2" class="hide"></div>
+      <div class="operate-con">
+        <div id="leave-con">
+          <img onclick="leaveRoom()" src="./img/icon_phone.png" alt="phone" />
         </div>
+        <div id="camera-con">
+          <img
+            onclick="enableCamera()"
+            src="./img/icon_camera.png"
+            alt="camera"
+          />
+        </div>
+        <div id="mic-con">
+          <img onclick="enableMic()" src="./img/icon_mic.png" alt="mic" />
+        </div>
+        <div id="seat-con" class="hide">
+          <img onclick="seatHandle()" src="./img/icon_cohost.png" alt="seat" />
+        </div>
+      </div>
     </div>
     <script src="./ZegoExpressManager.js"></script>
-    <script src="./local-config.js"></script>
+    <!-- <script src="./local-config.js"></script> -->
     <script src="./index.js"></script>
-</body>
+  </body>
 </html>
