@@ -74,21 +74,23 @@
       // !isMicValid && alert("This browser microphone unavailable");
     }
 
-    var randomS = function (len) {
+    var getUserID = function (len) {
+      let result = window.localStorage.getItem("userID");
+      if (result) return result;
       var chars =
           "12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP",
         maxPos = chars.length,
-        result = "",
         i;
       len = len || 5;
       for (i = 0; i < len; i++) {
         result += chars.charAt(Math.floor(Math.random() * maxPos));
       }
+      window.localStorage.setItem("userID", result);
       return result;
     };
 
     window.onload = function () {
-      document.querySelector("#userID").innerHTML = randomS(10);
+      document.querySelector("#userID").innerHTML = getUserID(10);
       checkRequirements();
       subscribe();
     };
@@ -96,11 +98,11 @@
     async function goCall() {
       if (document.querySelector("#userID2").value) {
         await sendMessage();
-        // window.location.href =
-        //   "./call.html?roomID=" +
-        //   document.querySelector("#userID2").value +
-        //   "&userID=" +
-        //   document.querySelector("#userID").innerHTML;
+        window.location.href =
+          "./call.html?roomID=" +
+          document.querySelector("#userID2").value +
+          "&userID=" +
+          document.querySelector("#userID").innerHTML;
       } else {
         setTimeout(function () {
           document.querySelector("#userID2").focus();
@@ -142,7 +144,14 @@
     //   `messaging.onBackgroundMessage` handler.
     onMessage(messaging, (payload) => {
       console.warn("Message received. ", payload);
-      // Update the UI to include the received message.
+
+      if (payload.data.targetUserID !== getUserID(10))
+        // enter room
+        window.location.href =
+          "./call.html?roomID=" +
+          payload.data.targetUserID +
+          "&userID=" +
+          payload.data.targetUserID;
     });
 
     window.subscribe = function () {
@@ -174,7 +183,6 @@
     function sendTokenToMyServer(token) {
       return fetch(`${config.tokenServerUrl}/store_fcm_token`, {
         method: "POST",
-        mode: "no-cors",
         headers: {
           "Content-Type": "application/json",
         },
@@ -183,7 +191,7 @@
           token,
         }),
       }).then((res) => {
-        // console.log(res.json());
+        console.log(res.json());
       });
     }
 
@@ -205,7 +213,6 @@
     window.sendMessage = function () {
       return fetch(`${config.tokenServerUrl}/call_invite`, {
         method: "POST",
-        mode: "no-cors",
         headers: {
           "Content-Type": "application/json",
         },
