@@ -55,21 +55,21 @@ export class ZegoExpressManager {
     return ZegoExpressManager.engine
       .checkSystemRequirements("webRTC")
       .then((result: ZegoCapabilityDetection) => {
-        return !!result.webRTC;
+        return !!result.result;
       });
   }
   checkCamera(): Promise<boolean> {
     return ZegoExpressManager.engine
       .checkSystemRequirements("camera")
       .then((result: ZegoCapabilityDetection) => {
-        return !!result.camera;
+        return !!result.result;
       });
   }
   checkMicrophone(): Promise<boolean> {
     return ZegoExpressManager.engine
       .checkSystemRequirements("microphone")
       .then((result: ZegoCapabilityDetection) => {
-        return !!result.microphone;
+        return !!result.result;
       });
   }
   joinRoom(

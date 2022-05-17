@@ -41,6 +41,67 @@
       height: 32px;
       width: 155px;
     }
+    .notify {
+      position: fixed;
+      top: 10vh;
+      right: 5vh;
+      background-color: #0c0c0cb8;
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      display: none;
+    }
+
+    .notify .avatar {
+      height: 100%;
+      color: aliceblue;
+      display: flex;
+    }
+    .notify .avatar img {
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+      margin: 15px;
+    }
+    .notify .context {
+      margin: 10px;
+    }
+    .notify .title {
+      font-size: 22px;
+    }
+    .notify .content {
+      font-size: 12px;
+    }
+    .notify .handler {
+      display: flex;
+      width: 90px;
+      justify-content: space-between;
+      padding: 22px 10px;
+    }
+    .refuse {
+      background-image: url(./static/refuse.jpeg);
+      background-size: 159%;
+      background-position-x: -11px;
+      background-repeat: no-repeat;
+      background-position-y: -10px;
+      width: 36px;
+      height: 36px;
+      border: 0px;
+      border-radius: 50%;
+      margin-right: 10px;
+      margin-right: 10px;
+    }
+    .accept {
+      background-image: url(./static/accept.jpeg);
+      background-size: 219%;
+      background-position-x: -21px;
+      background-repeat: no-repeat;
+      background-position-y: -34px;
+      width: 36px;
+      height: 36px;
+      border: 0px;
+      border-radius: 50%;
+    }
   </style>
   <body>
     <div class="user">
@@ -56,6 +117,22 @@
         /><button onClick="goCall()">Call</button>
       </div>
     </div>
+
+    <div class="notify">
+      <div class="avatar">
+        <img
+          src="https://resource.zegocloud.com/easyExample/call_invite/5-avatar.a71855f3.png"
+        />
+        <div class="context">
+          <div class="title">test</div>
+          <div class="content">teststafsafs</div>
+        </div>
+      </div>
+      <div class="handler">
+        <button class="refuse" onclick="refuse()"></button>
+        <button class="accept" onclick="accept()"></button>
+      </div>
+    </div>
   </body>
   <script src="./ZegoExpressManager.js"></script>
   <script>
@@ -63,19 +140,20 @@
       appID: 1719562607,
       serverURL: "wss://webliveroom" + 1719562607 + "-api.zegocloud.com/ws",
       tokenServerUrl: "https://easy-example-call.herokuapp.com",
+      targetRoomID: "",
     };
     async function checkRequirements() {
       ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
       var isSupportRTC = await ZegoExpressManager.shared.checkWebRTC();
       var isCameraValid = await ZegoExpressManager.shared.checkCamera();
       var isMicValid = await ZegoExpressManager.shared.checkMicrophone();
-      // !isSupportRTC && alert("This browser does not support WebRTC");
-      // !isCameraValid && alert("This browser camera unavailable");
-      // !isMicValid && alert("This browser microphone unavailable");
+      !isSupportRTC && alert("This browser does not support WebRTC");
+      !isCameraValid && alert("This browser camera unavailable");
+      !isMicValid && alert("This browser microphone unavailable");
     }
 
     var getUserID = function (len) {
-      let result = window.localStorage.getItem("userID");
+      let result = window.localStorage.getItem("userID") || "";
       if (result) return result;
       var chars =
           "12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP",
@@ -93,21 +171,60 @@
       document.querySelector("#userID").innerHTML = getUserID(10);
       checkRequirements();
       subscribe();
+
+      if (location.search && location.search.indexOf("roomID") > -1) {
+        showNotify(
+          getQueryString("title"),
+          getQueryString("body"),
+          getQueryString("roomID")
+        );
+      }
     };
+
+    function showNotify(title, body, roomID) {
+      document.querySelector(".title").innerHTML = title;
+      document.querySelector(".content").innerHTML = body;
+      document.querySelector(".notify").style.display = "flex";
+      config.targetRoomID = roomID;
+    }
+
+    function refuse() {
+      document.querySelector(".notify").style.display = "none";
+    }
+
+    function accept() {
+      // enter room
+      window.location.href =
+        "./call.html?roomID=" +
+        config.targetRoomID +
+        "&userID=" +
+        document.querySelector("#userID").innerHTML;
+    }
 
     async function goCall() {
       if (document.querySelector("#userID2").value) {
-        await sendMessage();
-        window.location.href =
-          "./call.html?roomID=" +
-          document.querySelector("#userID2").value +
-          "&userID=" +
-          document.querySelector("#userID").innerHTML;
+        let res = await sendMessage();
+        if (res.ret === 0) {
+          window.location.href =
+            "./call.html?roomID=" +
+            document.querySelector("#userID").innerHTML +
+            "&userID=" +
+            document.querySelector("#userID").innerHTML;
+        } else {
+          alert("The call failed, please check the network and try again");
+        }
       } else {
         setTimeout(function () {
           document.querySelector("#userID2").focus();
         }, 500);
       }
+    }
+
+    function getQueryString(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) return unescape(r[2]);
+      return null;
     }
   </script>
 
@@ -145,13 +262,13 @@
     onMessage(messaging, (payload) => {
       console.warn("Message received. ", payload);
 
-      if (payload.data.targetUserID !== getUserID(10))
-        // enter room
-        window.location.href =
-          "./call.html?roomID=" +
-          payload.data.targetUserID +
-          "&userID=" +
-          payload.data.targetUserID;
+      if (payload.data.targetUserID === getUserID(10)) {
+        showNotify(
+          payload.notification.title,
+          payload.notification.body,
+          payload.data.callerUserID
+        );
+      }
     });
 
     window.subscribe = function () {
@@ -162,8 +279,9 @@
         .then((currentToken) => {
           if (currentToken) {
             if (window.localStorage.getItem("web_push_token")) {
-              sendTokenToMyServer(currentToken);
+              // do nothing
             } else {
+              sendTokenToMyServer(currentToken);
               window.localStorage.setItem("web_push_token", currentToken);
             }
           } else {
@@ -176,7 +294,7 @@
           }
         })
         .catch((err) => {
-          console.log("An error occurred while retrieving token. ", err);
+          console.error("An error occurred while retrieving token. ", err);
         });
     };
 
@@ -220,13 +338,12 @@
           targetUserID: document.querySelector("#userID2").value,
           callerUserID: document.querySelector("#userID").innerHTML,
           callerUserName: document.querySelector("#userID").innerHTML,
-          callerIconUrl: "",
+          callerIconUrl:
+            "https://resource.zegocloud.com/easyExample/call_invite/5-avatar.a71855f3.png",
           roomID: document.querySelector("#userID").innerHTML,
         }),
-      }).then((res) => {
-        console.log(res);
-        console.log(res.json());
-      });
+      }).then((res) => res.json());
     };
   </script>
+  <div></div>
 </html>

@@ -80,12 +80,12 @@
   </body>
   <script src="./ZegoExpressManager.js"></script>
   <script>
-    var config = {
-      appID: 1719562607,
-      serverURL: "wss://webliveroom" + 1719562607 + "-api.zegocloud.com/ws",
+    const config = {
+      appID: 00000000, // Replace 00000000 with your own project appID registered in the console
+      serverURL: "wss://webliveroom" + 00000000 + "-api.zegocloud.com/ws", // Replace 00000000  with the project appID registered in the console
       userID: getQueryString("userID"),
       userName: "web-" + getQueryString("userID"),
-      tokenServerUrl: "https://easy-example-call.herokuapp.com",
+      tokenServerUrl: "https://xxxxxx.herokuapp.com", // Replace with your own heroku deployment address
       roomID: getQueryString("roomID"),
     };
     function initSDK() {
