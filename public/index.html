@@ -239,18 +239,19 @@
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
 
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    // Initialize the Firebase app in the service worker by passing in
+    // your app's Firebase config object.
+    // https://firebase.google.com/docs/web/setup#config-object
     const firebaseConfig = {
-      apiKey: "AIzaSyASiPspPxaPd-cwcLreUJ9JL5REprJd2To",
-      authDomain: "easyexample-7c37e.firebaseapp.com",
-      projectId: "easyexample-7c37e",
-      storageBucket: "easyexample-7c37e.appspot.com",
-      messagingSenderId: "17907117774",
-      appId: "1:17907117774:web:154c5b5a07a83208d4ea9f",
-      measurementId: "G-JK09KKQ2XW",
+      apiKey: "api-key",
+      authDomain: "project-id.firebaseapp.com",
+      databaseURL: "https://project-id.firebaseio.com",
+      projectId: "project-id",
+      storageBucket: "project-id.appspot.com",
+      messagingSenderId: "sender-id",
+      appId: "app-id",
+      measurementId: "G-measurement-id",
     };
-
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);

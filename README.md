@@ -1,6 +1,6 @@
 # ZEGOCLOUD easy example
 
-ZEGOCLOUD's easy example is a simple wrapper around our RTC product. You can refer to the sample code for quick integration.
+ZEGOCLOUD's easy example is a simple wrapper around our RTC product. You can refer to the sample code for quick integration.This branch is an invitation call scenario, including offline push；
 
 ## Getting started
 
@@ -9,6 +9,8 @@ The following will describe how to start this project.
 ### Prerequisites
 
 * Create a project in [ZEGOCLOUD Admin Console](https://console.zegocloud.com/). For details, see [ZEGO Admin Console - Project management](https://docs.zegocloud.com/article/1271).
+* Create in firebase to create a project, [see more details ](https://firebase.google.com/docs/web/setup#config-object)
+* Prepare your own server, we provide a heroku template to quickly help you deploy, [click to view details](https://github.com/ZEGOCLOUD/easy_example_call_server_nodejs)
 
 ### Install
 
@@ -21,7 +23,7 @@ The following will describe how to start this project.
 ![config](/media/init.png)
 
 * You need to modify `appID` and `serverURL` to your own account, which can be obtained in the [ZEGO Admin Console](https://console.zegocloud.com/).
-* [Generate a Token on your app server (recommended)](https://docs.zegocloud.com/article/11648), provide an interface for the client to call and replace the generateToken method above.
+* [Generate a Token on your app server (recommended)](), provide an interface for the client to call and replace the generateToken method above.
 
 ### Run the sample code
 
