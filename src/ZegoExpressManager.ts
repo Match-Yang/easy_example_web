@@ -52,22 +52,22 @@ export class ZegoExpressManager {
   checkWebRTC(): Promise<boolean> {
     return ZegoExpressManager.engine
       .checkSystemRequirements("webRTC")
-      .then((result: ZegoCapabilityDetection) => {
-        return !!result.webRTC;
+      .then((data: ZegoCapabilityDetection) => {
+        return !!data.result;
       });
   }
   checkCamera(): Promise<boolean> {
     return ZegoExpressManager.engine
       .checkSystemRequirements("camera")
-      .then((result: ZegoCapabilityDetection) => {
-        return !!result.camera;
+      .then((data: ZegoCapabilityDetection) => {
+        return !!data.result;
       });
   }
   checkMicrophone(): Promise<boolean> {
     return ZegoExpressManager.engine
       .checkSystemRequirements("microphone")
-      .then((result: ZegoCapabilityDetection) => {
-        return !!result.microphone;
+      .then((data: ZegoCapabilityDetection) => {
+        return !!data.result;
       });
   }
   joinRoom(
