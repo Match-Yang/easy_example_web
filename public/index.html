@@ -1,68 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Example</title>
-</head>
-<style>
-    html, body {
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        margin: 0;
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZEGOCLOUD EasyExample Home</title>
+  </head>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
     }
-    video {
-        width: 100%;
-        height: 100%;
+    .user {
+      text-align: center;
+      border: 0px solid #ddd;
+      padding-top: 40vh;
+      color: #646a73;
+      font-size: 14px;
     }
-    #video-con1 {
-        display: inline-block;
-        border: 1px solid #ddd;
-        box-sizing: border-box;
-        background: #c2c2c2;
+    .line {
+      width: 300px;
+      margin: auto;
+      text-align: left;
+      margin-top: 30px;
     }
-    #video-con2 {
-        display: inline-block;
-        border: 1px solid #ddd;
-        background: #ddd;
-        box-sizing: border-box;
-        width: 40%;
-        height: 40%;
+    .user button {
+      background-color: #007aff;
+      margin-left: 20px;
+      border: 0px;
+      height: 32px;
+      border-radius: 5%;
+      color: white;
     }
-    @media screen and (min-width: 901px) {
-        #video-con1 {
-            width: 40%;
-            height: 40%;
-        }
+    .user input {
+      border: 0px;
+      border-bottom: 2px solid gray;
+      height: 32px;
+      width: 155px;
     }
-    @media screen and (max-width: 900px) {
-        #video-con1 {
-            width: 100%;
-            height: 70%;
-        }
-        #video-con2 {
-            position: fixed;
-            top: 0px;
-            right: 0px;
-        }
-    }
-</style>
-<body>
-    <div id="video-con1"></div>
-    <div id="video-con2"></div>
-    <div>
-        <button onclick="initSDK()">init SDK</button>
-        <button onclick="checkWebRTC()">checkWebRTC</button>
-        <button onclick="checkCamera()">checkCamera</button>
-        <button onclick="checkMicrophone()">checkMicrophone</button>
-        <button onclick="joinRoom()">joinRoom</button>
-        <button onclick="enableCamera()">enableCamera</button>
-        <button onclick="enableMic()">enableMic</button>
-        <button onclick="leaveRoom()">leaveRoom</button>
+  </style>
+  <body>
+    <div class="user">
+      <div class="line">
+        <label>userID:</label>
+        <span id="userID">xxxx</span>
+      </div>
+      <div class="line">
+        <input
+          placeholder="Please enter roomID"
+          id="roomID"
+          title="Users with the same roomID can talk to each other"
+        /><button onClick="goCall()">Call</button>
+      </div>
     </div>
-    <script src="./ZegoExpressManager.js"></script>
-    <script src="./index.js"></script>
-</body>
+  </body>
+  <script src="./ZegoExpressManager.js"></script>
+  <script>
+    var config = {
+      appID: 000000,
+      serverURL: "wss://webliveroom" + 000000 + "-api.zegocloud.com/ws",
+      tokenServerUrl: "https://easy-example-call.herokuapp.com",
+      targetRoomID: "",
+    };
+    async function checkRequirements() {
+      ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
+      var isSupportRTC = await ZegoExpressManager.shared.checkWebRTC();
+      var isCameraValid = await ZegoExpressManager.shared.checkCamera();
+      var isMicValid = await ZegoExpressManager.shared.checkMicrophone();
+      !isSupportRTC && alert("This browser does not support WebRTC");
+      !isCameraValid && alert("This browser camera unavailable");
+      !isMicValid && alert("This browser microphone unavailable");
+    }
+
+    var getUserID = function (len) {
+      let result = "";
+      if (result) return result;
+      var chars =
+          "12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP",
+        maxPos = chars.length,
+        i;
+      len = len || 5;
+      for (i = 0; i < len; i++) {
+        result += chars.charAt(Math.floor(Math.random() * maxPos));
+      }
+      return result;
+    };
+
+    async function goCall() {
+      if (document.querySelector("#roomID").value) {
+        window.location.href =
+          "./call.html?roomID=" +
+          document.querySelector("#roomID").value +
+          "&userID=" +
+          document.querySelector("#userID").innerHTML;
+      } else {
+        setTimeout(function () {
+          document.querySelector("#roomID").focus();
+        }, 500);
+      }
+    }
+
+    window.onload = function () {
+      document.querySelector("#userID").innerHTML = getUserID(10);
+      checkRequirements();
+    };
+  </script>
 </html>
