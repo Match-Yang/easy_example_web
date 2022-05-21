@@ -428,6 +428,7 @@ export class ZegoExpressManager {
     const mediaDom = document.createElement("video");
     mediaDom.id = "zego-video-" + userID;
     mediaDom.autoplay = true;
+    mediaDom.playsInline = true;
     if (type === ZegoVideoViewType.Local) {
       mediaDom.muted = true;
     }
