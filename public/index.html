@@ -41,6 +41,57 @@
       height: 32px;
       width: 155px;
     }
+
+    video {
+      height: 100%;
+    }
+    .user1 {
+      border: 0px solid #ddd;
+      box-sizing: border-box;
+      width: auto;
+      height: 100%;
+      text-align: center;
+    }
+    .user2 {
+      border: 0px solid #ddd;
+      box-sizing: border-box;
+      position: fixed;
+      top: 0px;
+      width: 40vh;
+      right: 0px;
+      height: 30vh;
+    }
+    .publishHandler {
+      position: relative;
+      bottom: 200px;
+      width: 100%;
+      background-color: rgba(221, 221, 221, 0);
+    }
+    .mic,
+    .hangup,
+    .camera {
+      width: 50px;
+      height: 50px;
+      margin-left: 20px;
+      border: rgba(221, 221, 221, 0);
+      border-radius: 50%;
+      background-size: cover;
+    }
+    .mic {
+      background-image: url(./static/micOn.png);
+    }
+    .mic.off {
+      background-image: url(./static/micOff.png);
+    }
+    .hangup {
+      background-image: url(./static/hangUp.png);
+    }
+    .camera {
+      background-image: url(./static/cameraOn.png);
+    }
+    .camera.off {
+      background-image: url(./static/cameraOff.png);
+    }
   </style>
   <body>
     <div class="user">
@@ -56,56 +107,19 @@
         /><button onClick="goCall()">Call</button>
       </div>
     </div>
+    <div class="call" style="display: none; height: 100vh">
+      <div class="user1">
+        <video controls></video>
+        <div class="publishHandler">
+          <button class="mic"></button>
+          <button class="hangup"></button>
+          <button class="camera"></button>
+        </div>
+      </div>
+      <div class="user2">
+        <video controls></video>
+      </div>
+    </div>
   </body>
-  <script src="./ZegoExpressManager.js"></script>
-  <script>
-    var config = {
-      appID: 000000,
-      serverURL: "wss://webliveroom" + 000000 + "-api.zegocloud.com/ws",
-      tokenServerUrl: "https://easy-example-call.herokuapp.com",
-      targetRoomID: "",
-    };
-    async function checkRequirements() {
-      ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
-      var isSupportRTC = await ZegoExpressManager.shared.checkWebRTC();
-      var isCameraValid = await ZegoExpressManager.shared.checkCamera();
-      var isMicValid = await ZegoExpressManager.shared.checkMicrophone();
-      !isSupportRTC && alert("This browser does not support WebRTC");
-      !isCameraValid && alert("This browser camera unavailable");
-      !isMicValid && alert("This browser microphone unavailable");
-    }
-
-    var getUserID = function (len) {
-      let result = "";
-      if (result) return result;
-      var chars =
-          "12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP",
-        maxPos = chars.length,
-        i;
-      len = len || 5;
-      for (i = 0; i < len; i++) {
-        result += chars.charAt(Math.floor(Math.random() * maxPos));
-      }
-      return result;
-    };
-
-    async function goCall() {
-      if (document.querySelector("#roomID").value) {
-        window.location.href =
-          "./call.html?roomID=" +
-          document.querySelector("#roomID").value +
-          "&userID=" +
-          document.querySelector("#userID").innerHTML;
-      } else {
-        setTimeout(function () {
-          document.querySelector("#roomID").focus();
-        }, 500);
-      }
-    }
-
-    window.onload = function () {
-      document.querySelector("#userID").innerHTML = getUserID(10);
-      checkRequirements();
-    };
-  </script>
+  <script src="./index.js"></script>
 </html>
