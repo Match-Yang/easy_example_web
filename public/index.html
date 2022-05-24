@@ -137,9 +137,9 @@
   <script src="./ZegoExpressManager.js"></script>
   <script>
     var config = {
-      appID: 1719562607,
-      serverURL: "wss://webliveroom" + 1719562607 + "-api.zegocloud.com/ws",
-      tokenServerUrl: "https://easy-example-call.herokuapp.com",
+      appID: 0000000,
+      serverURL: "wss://webliveroom" + 0000000 + "-api.zegocloud.com/ws",
+      tokenServerUrl: "https://xxxxxx.herokuapp.com",
       targetRoomID: "",
     };
     async function checkRequirements() {
@@ -239,19 +239,18 @@
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
 
-    // Initialize the Firebase app in the service worker by passing in
-    // your app's Firebase config object.
-    // https://firebase.google.com/docs/web/setup#config-object
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
-      apiKey: "api-key",
-      authDomain: "project-id.firebaseapp.com",
-      databaseURL: "https://project-id.firebaseio.com",
-      projectId: "project-id",
-      storageBucket: "project-id.appspot.com",
-      messagingSenderId: "sender-id",
-      appId: "app-id",
-      measurementId: "G-measurement-id",
+      apiKey: "xxxxxxx",
+      authDomain: "xxxxxxx",
+      projectId: "xxxxxxx",
+      storageBucket: "xxxxxxx",
+      messagingSenderId: "xxxxxxx",
+      appId: "xxxxxxx",
+      measurementId: "xxxxxxx",
     };
+
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);
@@ -274,17 +273,11 @@
 
     window.subscribe = function () {
       getToken(messaging, {
-        vapidKey:
-          "BFexwH4yF5B9rDdfdEYpoBFAFntYi6omwh4x5FTnZ-CiB24uW2og3J9gRI0LwTDdEWKssnP5b1QDQBeP0xQnj9I",
+        vapidKey: "xxxxxxxxxxxxxx",
       })
         .then((currentToken) => {
           if (currentToken) {
-            if (window.localStorage.getItem("web_push_token")) {
-              // do nothing
-            } else {
-              sendTokenToMyServer(currentToken);
-              window.localStorage.setItem("web_push_token", currentToken);
-            }
+            sendTokenToMyServer(currentToken);
           } else {
             // Show permission request.
             console.log(
@@ -346,5 +339,4 @@
       }).then((res) => res.json());
     };
   </script>
-  <div></div>
 </html>

@@ -80,12 +80,12 @@
   </body>
   <script src="./ZegoExpressManager.js"></script>
   <script>
-    const config = {
-      appID: 00000000, // Replace 00000000 with your own project appID registered in the console
-      serverURL: "wss://webliveroom" + 00000000 + "-api.zegocloud.com/ws", // Replace 00000000  with the project appID registered in the console
+    var config = {
+      appID: 0000000,
+      serverURL: "wss://webliveroom" + 0000000 + "-api.zegocloud.com/ws",
       userID: getQueryString("userID"),
       userName: "web-" + getQueryString("userID"),
-      tokenServerUrl: "https://xxxxxx.herokuapp.com", // Replace with your own heroku deployment address
+      tokenServerUrl: "https://easy-example-call.herokuapp.com",
       roomID: getQueryString("roomID"),
     };
     function initSDK() {
@@ -153,25 +153,6 @@
       }, 1000);
     }
 
-    document.querySelectorAll(".publishHandler button").forEach((value) => {
-      value.addEventListener("click", function () {
-        if (value.classList.contains("off")) {
-          value.classList.remove("off");
-        } else {
-          value.classList.add("off");
-        }
-
-        if (value.classList.contains("mic")) {
-          enableMic(value.classList.contains("off"));
-        } else if (value.classList.contains("camera")) {
-          enableCamera(value.classList.contains("off"));
-        } else {
-          leaveRoom();
-        }
-      });
-    });
-    initSDK();
-
     function getQueryString(name) {
       var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
       var r = window.location.search.substr(1).match(reg);
@@ -188,5 +169,27 @@
         }
       ).then((res) => res.json());
     }
+
+    window.onload = function () {
+      document.querySelectorAll(".publishHandler button").forEach((value) => {
+        value.addEventListener("click", function () {
+          if (value.classList.contains("off")) {
+            value.classList.remove("off");
+          } else {
+            value.classList.add("off");
+          }
+
+          if (value.classList.contains("mic")) {
+            enableMic(value.classList.contains("off"));
+          } else if (value.classList.contains("camera")) {
+            enableCamera(value.classList.contains("off"));
+          } else {
+            leaveRoom();
+          }
+        });
+      });
+
+      initSDK();
+    };
   </script>
 </html>
