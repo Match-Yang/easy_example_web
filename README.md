@@ -1,4 +1,16 @@
 # ZEGOCLOUD easy example
+  <p align="center">
+    <a href="https://zegocloud.github.io/meeting/index.html"><img src="https://img.shields.io/badge/Online%20Demo-Click%20Me-success" alt="Platform"/></a>
+    <a href="https://discord.gg/EtNRATttyp">
+        <img src="https://img.shields.io/discord/980014613179555870?color=5865F2&logo=discord&logoColor=white" alt="ZEGOCLOUD"/>
+    </a>
+    <p>
+    <p>Click the search button below to search documentation or error code</p>
+    <a href="https://docs.zegocloud.com/">
+        <img width="589" alt="image" src="https://user-images.githubusercontent.com/5242852/170823639-2a684b4c-0bad-445a-b04e-5d4b6912e900.png">
+    </a>
+    </p>
+</p>
 
 ZEGOCLOUD's easy example is a simple wrapper around our RTC product. You can refer to the sample code for quick integration.
 
