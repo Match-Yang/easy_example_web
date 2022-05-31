@@ -105,6 +105,8 @@ async function joinLiveAsHost() {
     if (!roomID) { return; }
     config.roomID = roomID;
 
+    alert('Joining the room, please wait a moment');
+
     const token = (await generateToken()).data.token;
     const user = { userID: config.userID, userName: config.userName };
     data.userList.set(config.userID, { ...user, role: 0 })
@@ -119,6 +121,8 @@ async function joinLiveAsAudience() {
     const roomID = document.querySelector('#roomID').value;
     if (!roomID) { return; }
     config.roomID = roomID;
+
+    alert('Joining the room, please wait a moment');
 
     const token = (await generateToken()).data.token;
     const user = { userID: config.userID, userName: config.userName };
