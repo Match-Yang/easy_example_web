@@ -1,3 +1,12 @@
+import { ZegoUser } from "zego-express-engine-webrtm/sdk/code/zh/ZegoExpressEntity";
+export interface ZegoRoomUser extends ZegoUser {
+    role?: ZegoUserRole;
+}
+export declare enum ZegoUserRole {
+    Host = 0,
+    CoHost = 1,
+    Audience = 2
+}
 export declare enum ZegoMediaOptions {
     AutoPlayAudio = 1,
     AutoPlayVideo = 2,
@@ -17,10 +26,6 @@ export declare enum ZegoStreamQualityLevel {
     Medium = 2,
     Bad = 3,
     Die = 4
-}
-export interface ZegoUser {
-    userID: string;
-    userName?: string;
 }
 export interface ZegoRoomConfig {
     userUpdate: boolean;
