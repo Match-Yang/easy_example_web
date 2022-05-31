@@ -46,6 +46,7 @@ npm run dev
 
 ## Integrate the SDK into your own project
 
+[![](media/youtube.jpg)](https://www.youtube.com/watch?v=9AwqP8B-FY4)
 The following will describe how to build your own project based on this project.
 
 ### Copy the source code
