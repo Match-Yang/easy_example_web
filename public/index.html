@@ -183,6 +183,69 @@
     }
   </style>
   <style>
+    .notify {
+      position: fixed;
+      top: 10vh;
+      right: 5vh;
+      background-color: #0c0c0cb8;
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      display: none;
+      z-index: 4;
+    }
+    .notify .avatar {
+      height: 100%;
+      color: aliceblue;
+      display: flex;
+    }
+    .notify .avatar img {
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+      margin: 15px;
+    }
+    .notify .context {
+      margin: 10px;
+    }
+    .notify .title {
+      font-size: 22px;
+    }
+    .notify .content {
+      font-size: 12px;
+    }
+    .notify .handler {
+      display: flex;
+      width: 110px;
+      justify-content: space-between;
+      padding: 22px 10px;
+    }
+    .refuse {
+      background-image: url(./img/refuse.jpeg);
+      background-size: 159%;
+      background-position-x: -11px;
+      background-repeat: no-repeat;
+      background-position-y: -10px;
+      width: 36px;
+      height: 36px;
+      border: 0px;
+      border-radius: 50%;
+      margin-right: 10px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .accept {
+      background-image: url(./img/accept.jpeg);
+      background-size: 219%;
+      background-position-x: -21px;
+      background-repeat: no-repeat;
+      background-position-y: -34px;
+      width: 36px;
+      height: 36px;
+      border: 0px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
   </style>
   <body>
     <div id="home-page">
@@ -235,6 +298,21 @@
         <div id="message-input-con">
           <input type="text" placeholder="Please enter a message">
           <span onclick="sendBroadcastMessage()">send</span>
+        </div>
+      </div>
+      <div class="notify">
+        <div class="avatar">
+          <img
+            src="https://resource.zegocloud.com/easyExample/call_invite/5-avatar.a71855f3.png"
+          />
+          <div class="context">
+            <div class="title"></div>
+            <div class="content"></div>
+          </div>
+        </div>
+        <div class="handler">
+          <button class="refuse"></button>
+          <button class="accept"></button>
         </div>
       </div>
     </div>

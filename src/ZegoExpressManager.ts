@@ -837,11 +837,7 @@ export class ZegoExpressManager {
       if (roomExtraInfo.key !== this.hostLogoutKey) {
         roomExtraInfoList_.push(roomExtraInfo);
       } else {
-        roomExtraInfo.value === "true" &&
-          this.getRoomRoleByUserID(this.localParticipant.userID) !==
-            ZegoUserRole.Host &&
-          this.localParticipant.userID !== roomExtraInfo.updateUser.userID &&
-          (kickedOut = true);
+        roomExtraInfo.value === "true" && (kickedOut = true);
       }
     });
     if (roomExtraInfoList_.length) {

@@ -75,8 +75,9 @@ function initSDK() {
         console.warn('[ZEGOCLOUD Log][Demo][onRoomStateUpdate]', state);
     })
     ZegoExpressManager.shared.onInvitedJoinLive(() => {
-        const result = confirm("Received the invitation of taking the co-host seat, are you sure you want to connect?");
-        result && !data.isSeat && seatManagement();
+        showNotify('InvitedJoinLive', 'Received the invitation of taking the co-host seat, are you sure you want to connect?', (result) => {
+            result && !data.isSeat && seatManagement();
+        });
     })
     ZegoExpressManager.shared.onBroadcastMessageRecv((msgList) => {
         console.warn('[ZEGOCLOUD Log][Demo][onBroadcastMessageRecv]', msgList);
@@ -110,12 +111,17 @@ async function joinLiveAsHost() {
     const token = (await generateToken()).data.token;
     const user = { userID: config.userID, userName: config.userName };
     data.userList.set(config.userID, { ...user, role: 0 })
-    await ZegoExpressManager.shared.joinRoom(roomID, token, user, [1, 2, 4, 8]);
-
-    triggerPageView('main');
-    triggerRenderHostViewCon(true, config.userID, ZegoExpressManager.shared.getLocalVideoView());
-    updateUserListView([{ ...user, role: 0 }], 'ADD');
-
+    ZegoExpressManager.shared.joinRoom(roomID, token, user, [1, 2, 4, 8]).then((result) => {
+        if (result) {
+            triggerPageView('main');
+            triggerRenderHostViewCon(true, config.userID, ZegoExpressManager.shared.getLocalVideoView());
+            updateUserListView([{ ...user, role: 0 }], 'ADD');
+        }
+    }).catch((error) => {
+        if (error.code === 1002034) {
+            alert('The number of users logged in to the room exceeds the maximum number of users configured in the room');
+        }
+    });
 }
 async function joinLiveAsAudience() {
     const roomID = document.querySelector('#roomID').value;
@@ -127,14 +133,19 @@ async function joinLiveAsAudience() {
     const token = (await generateToken()).data.token;
     const user = { userID: config.userID, userName: config.userName };
     data.userList.set(config.userID, { ...user, role: 2 })
-    await ZegoExpressManager.shared.joinRoom(roomID, token, user, [1, 2]);
-
-
-    triggerPageView('main');
-    triggerCameraView(false);
-    triggerMicView(false);
-    triggerSeatView(true);
-    updateUserListView([{ ...user, role: 2 }], 'ADD');
+    ZegoExpressManager.shared.joinRoom(roomID, token, user, [1, 2]).then((result) => {
+        if (result) {
+            triggerPageView('main');
+            triggerCameraView(false);
+            triggerMicView(false);
+            triggerSeatView(true);
+            updateUserListView([{ ...user, role: 2 }], 'ADD');
+        }
+    }).catch((error) => {
+        if (error.code === 1002034) {
+            alert('The number of users logged in to the room exceeds the maximum number of users configured in the room');
+        }
+    });
 }
 function seatManagement() {
     !data.isSeat ? takeCoHostSeat() : leaveCoHostSeat();
@@ -347,4 +358,15 @@ function updateMsgListView(msgList) {
         fragment.appendChild(messageItemView);
     });
     messageListView.appendChild(fragment);
+}
+function showNotify(title, body, callback) {
+    document.querySelector(".title").innerHTML = title;
+    document.querySelector(".content").innerHTML = body;
+    document.querySelector(".notify").style.display = "flex";
+    document.querySelectorAll(".notify .handler button").forEach((el) => {
+        el.onclick = () => {
+            callback(el.classList.contains("accept"));
+            document.querySelector(".notify").style.display = "none";
+        };
+    });
 }
