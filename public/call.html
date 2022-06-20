@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZEGOCLOUD EasyExample Call</title>
+  </head>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    video {
+      height: 100%;
+    }
+    .user1 {
+      border: 0px solid #ddd;
+      box-sizing: border-box;
+      width: auto;
+      height: 100%;
+      text-align: center;
+    }
+    .user2 {
+      border: 0px solid #ddd;
+      box-sizing: border-box;
+      position: fixed;
+      top: 0px;
+      width: 40vh;
+      right: 0px;
+      height: 30vh;
+    }
+    .publishHandler {
+      position: relative;
+      bottom: 200px;
+      width: 100%;
+      background-color: rgba(221, 221, 221, 0);
+    }
+    .mic,
+    .hangup,
+    .camera {
+      width: 50px;
+      height: 50px;
+      margin-left: 20px;
+      border: rgba(221, 221, 221, 0);
+      border-radius: 50%;
+      background-size: cover;
+    }
+    .mic {
+      background-image: url(./static/micOn.png);
+    }
+    .mic.off {
+      background-image: url(./static/micOff.png);
+    }
+    .hangup {
+      background-image: url(./static/hangUp.png);
+    }
+    .camera {
+      background-image: url(./static/cameraOn.png);
+    }
+    .camera.off {
+      background-image: url(./static/cameraOff.png);
+    }
+  </style>
+  <body>
+    <div class="user1">
+      <video controls></video>
+      <div class="publishHandler">
+        <button class="mic"></button>
+        <button class="hangup"></button>
+        <button class="camera"></button>
+      </div>
+    </div>
+    <div class="user2">
+      <video controls></video>
+    </div>
+  </body>
+  <script src="./ZegoExpressManager.js"></script>
+  <script>
+    var config = {
+      appID: 1719562607,
+      serverURL: "wss://webliveroom" + 1719562607 + "-api.zegocloud.com/ws",
+      userID: getQueryString("userID"),
+      userName: "web-" + getQueryString("userID"),
+      tokenServerUrl: "https://easy-example-call.herokuapp.com",
+      roomID: getQueryString("roomID"),
+    };
+    function initSDK() {
+      ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
+      ZegoExpressManager.shared.onRoomUserUpdate(
+        (updateType, userList, roomID) => {
+          userList.forEach((userID) => {
+            if (updateType === "ADD") {
+              console.warn("roomUserUpdate");
+              const videoDom =
+                ZegoExpressManager.shared.getRemoteVideoView(userID);
+
+              document
+                .querySelector(".user2")
+                .replaceChild(videoDom, document.querySelector(".user2 video"));
+            } else {
+              var remoteVideo = document.createElement("video");
+              remoteVideo.controls = true;
+              document
+                .querySelector(".user2")
+                .replaceChild(
+                  remoteVideo,
+                  document.querySelector(".user2 video")
+                );
+            }
+          });
+        }
+      );
+      ZegoExpressManager.shared.onRoomUserDeviceUpdate(
+        (updateType, userID, roomID) => {
+          console.warn(updateType, userID, roomID);
+        }
+      );
+      ZegoExpressManager.shared.onRoomTokenWillExpire(async (roomID) => {
+        const token = (await generateToken()).data.token;
+        ZegoExpressManager.getEngine().renewToken(token);
+      });
+      ZegoExpressManager.shared.onIMRecvBroadcastMessage(
+        async (roomID, messageInfo) => {
+          console.warn("onIMRecvBroadcastMessage", roomID, messageInfo);
+        }
+      );
+      joinRoom();
+    }
+
+    async function joinRoom() {
+      const tokenObj = await generateToken();
+      await ZegoExpressManager.shared.joinRoom(config.roomID, tokenObj.token, {
+        userID: config.userID,
+        userName: config.userName,
+      });
+      const videoDom = ZegoExpressManager.shared.getLocalVideoView();
+      videoDom.controls = true;
+      document
+        .querySelector(".user1")
+        .replaceChild(videoDom, document.querySelector(".user1 video"));
+
+      setTimeout(() => {
+        ZegoExpressManager.shared.sendBroadcastMessage(
+          config.roomID,
+          "hello world!"
+        );
+      }, 3000);
+    }
+    function enableCamera(cameraEnable) {
+      const result = ZegoExpressManager.shared.enableCamera(!cameraEnable);
+      result && (cameraEnable = !cameraEnable);
+    }
+    function enableMic(micEnable) {
+      result = ZegoExpressManager.shared.enableMic(!micEnable);
+      result && (micEnable = !micEnable);
+    }
+    function leaveRoom() {
+      ZegoExpressManager.shared.leaveRoom();
+      setTimeout(function () {
+        location.href = "./index.html";
+      }, 1000);
+    }
+
+    function getQueryString(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) return unescape(r[2]);
+      return null;
+    }
+
+    function generateToken() {
+      // Obtain the token interface provided by the App Server
+      return fetch(
+        `${config.tokenServerUrl}/access_token?uid=${config.userID}&expired_ts=7200`,
+        {
+          method: "GET",
+        }
+      ).then((res) => res.json());
+    }
+
+    window.onload = function () {
+      document.querySelectorAll(".publishHandler button").forEach((value) => {
+        value.addEventListener("click", function () {
+          if (value.classList.contains("off")) {
+            value.classList.remove("off");
+          } else {
+            value.classList.add("off");
+          }
+
+          if (value.classList.contains("mic")) {
+            enableMic(value.classList.contains("off"));
+          } else if (value.classList.contains("camera")) {
+            enableCamera(value.classList.contains("off"));
+          } else {
+            leaveRoom();
+          }
+        });
+      });
+
+      initSDK();
+    };
+  </script>
+</html>

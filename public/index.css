@@ -1,0 +1,101 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+.user {
+  text-align: center;
+  border: 0px solid #ddd;
+  padding-top: 20vh;
+  color: #646a73;
+  font-size: 14px;
+}
+.userList {
+  height: 40vh;
+  overflow-y: auto;
+  background: #7f83893d;
+  margin-top: 10px;
+}
+.line {
+  width: 300px;
+  margin: auto;
+  text-align: left;
+  margin-top: 3px;
+}
+.user button {
+  background-color: #007aff;
+  margin-left: 20px;
+  border: 0px;
+  height: 32px;
+  border-radius: 5%;
+  color: white;
+}
+.user input {
+  border: 0px;
+  border-bottom: 2px solid gray;
+  height: 32px;
+  width: 155px;
+}
+.notify {
+  position: fixed;
+  top: 10vh;
+  right: 5vh;
+  background-color: #0c0c0cb8;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  display: none;
+}
+
+.notify .avatar {
+  height: 100%;
+  color: aliceblue;
+  display: flex;
+}
+.notify .avatar img {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  margin: 15px;
+}
+.notify .context {
+  margin: 10px;
+}
+.notify .title {
+  font-size: 22px;
+}
+.notify .content {
+  font-size: 12px;
+}
+.notify .handler {
+  display: flex;
+  width: 90px;
+  justify-content: space-between;
+  padding: 22px 10px;
+}
+.refuse {
+  background-image: url(./static/refuse.jpeg);
+  background-size: 159%;
+  background-position-x: -11px;
+  background-repeat: no-repeat;
+  background-position-y: -10px;
+  width: 36px;
+  height: 36px;
+  border: 0px;
+  border-radius: 50%;
+  margin-right: 10px;
+  margin-right: 10px;
+}
+.accept {
+  background-image: url(./static/accept.jpeg);
+  background-size: 219%;
+  background-position-x: -21px;
+  background-repeat: no-repeat;
+  background-position-y: -34px;
+  width: 36px;
+  height: 36px;
+  border: 0px;
+  border-radius: 50%;
+}

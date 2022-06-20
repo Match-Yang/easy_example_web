@@ -1,12 +1,34 @@
-// SDK basic configuration
+var userID = getUserID(10);
 var config = {
-  appID: 0000000,
-  serverURL: "wss://webliveroom" + 0000000 + "-api.zegocloud.com/ws",
-  tokenServerUrl: "https://xxxxxx.herokuapp.com",
+  appID: 1719562607,
+  serverURL: "wss://webliveroom" + 1719562607 + "-api.zegocloud.com/ws",
+  userID: userID,
+  userName: "web-" + userID,
+  tokenServerUrl: "https://easy-example-call.herokuapp.com",
+  roomID: "hall",
   targetRoomID: "",
-  userID: getUserID(10),
 };
+async function checkRequirements() {
+  ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
+  var isSupportRTC = await ZegoExpressManager.shared.checkWebRTC();
+  var isCameraValid = await ZegoExpressManager.shared.checkCamera();
+  var isMicValid = await ZegoExpressManager.shared.checkMicrophone();
+  !isSupportRTC && alert("This browser does not support WebRTC");
+  !isCameraValid && alert("This browser camera unavailable");
+  !isMicValid && alert("This browser microphone unavailable");
+}
 
+function getUserID(len) {
+  let result = "";
+  var chars = "12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP",
+    maxPos = chars.length,
+    i;
+  len = len || 5;
+  for (i = 0; i < len; i++) {
+    result += chars.charAt(Math.floor(Math.random() * maxPos));
+  }
+  return result;
+}
 // dynamically load plugins
 function loadScript(url, callback) {
   const script = document.createElement("script");
@@ -34,140 +56,71 @@ loadScript("./ZegoExpressManager.js", init);
 
 // Render UI, bind click event
 function init() {
-  document.querySelector("#userID").innerHTML = config.userID;
+  document.querySelector("#userID").innerHTML = userID;
   checkRequirements();
-  document.querySelector(".user button").addEventListener("click", goCall);
-  document.querySelectorAll(".publishHandler button").forEach((value) => {
-    value.addEventListener("click", function () {
-      if (value.classList.contains("off")) {
-        value.classList.remove("off");
-      } else {
-        value.classList.add("off");
-      }
-
-      if (value.classList.contains("mic")) {
-        enableMic(value.classList.contains("off"));
-      } else if (value.classList.contains("camera")) {
-        enableCamera(value.classList.contains("off"));
-      } else {
-        leaveRoom();
-      }
-    });
-  });
-}
-
-// Generate random userID
-function getUserID(len) {
-  let result = "";
-  if (result) return result;
-  var chars = "12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP",
-    maxPos = chars.length,
-    i;
-  len = len || 5;
-  for (i = 0; i < len; i++) {
-    result += chars.charAt(Math.floor(Math.random() * maxPos));
-  }
-  return result;
-}
-
-// Compatibility check
-// Microphone availability check
-// camera availability check
-async function checkRequirements() {
-  ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
-  var isSupportRTC = await ZegoExpressManager.shared.checkWebRTC();
-  var isCameraValid = await ZegoExpressManager.shared.checkCamera();
-  var isMicValid = await ZegoExpressManager.shared.checkMicrophone();
-  !isSupportRTC && alert("This browser does not support WebRTC");
-  !isCameraValid && alert("This browser camera unavailable");
-  !isMicValid && alert("This browser microphone unavailable");
+  initSDK();
 }
 
 function initSDK() {
   ZegoExpressManager.shared.createEngine(config.appID, config.serverURL);
   ZegoExpressManager.shared.onRoomUserUpdate((updateType, userList, roomID) => {
     userList.forEach((userID) => {
-      if (updateType === "ADD") {
-        console.warn("roomUserUpdate");
-        const videoDom = ZegoExpressManager.shared.getRemoteVideoView(userID);
-
+      const target = document.getElementsByClassName(".userList ." + userID);
+      if (updateType === "ADD" && target.length === 0) {
         document
-          .querySelector(".user2")
-          .replaceChild(videoDom, document.querySelector(".user2 video"));
+          .querySelector(".userList")
+          .appendChild(createUserContainer(userID));
       } else {
-        var remoteVideo = document.createElement("video");
-        remoteVideo.controls = true;
-        document
-          .querySelector(".user2")
-          .replaceChild(remoteVideo, document.querySelector(".user2 video"));
+        target.length > 0 &&
+          document.querySelector(".userList").removeChild(target[0]);
       }
     });
   });
-  ZegoExpressManager.shared.onRoomUserDeviceUpdate(
-    (updateType, userID, roomID) => {
-      console.warn(updateType, userID, roomID);
+  ZegoExpressManager.shared.onIMRecvCustomCommand(
+    (roomID, fromUser, command) => {
+      if (command === "invite") {
+        showNotify(
+          command,
+          fromUser.userID + " " + command + " call",
+          fromUser.userID
+        );
+      } else if (command === "agree") {
+        window.location.href =
+          "./call.html?roomID=" + config.userID + "&userID=" + config.userID;
+      }
     }
   );
-  ZegoExpressManager.shared.onRoomTokenWillExpire(async (roomID) => {
-    const token = (await generateToken()).data.token;
-    ZegoExpressManager.getEngine().renewToken(token);
-  });
-
   joinRoom();
 }
 
-// start the call
-function goCall() {
-  if (document.querySelector("#roomID").value) {
-    document.querySelector(".user").style.display = "none";
-    document.querySelector(".call").style.display = "block";
-    initSDK();
-  } else {
-    setTimeout(function () {
-      document.querySelector("#roomID").focus();
-    }, 500);
-  }
+function createUserContainer(userID) {
+  const _div = document.createElement("div");
+  _div.innerHTML = `
+      <label>userID:</label> <span>${userID}</span
+      ><button>Call</button>
+     `;
+  _div.classList.add(userID, "line");
+  _div.getElementsByTagName("button")[0].onclick = () => {
+    ZegoExpressManager.shared.sendCustomCommand(config.roomID, "invite", [
+      userID,
+    ]);
+  };
+  return _div;
 }
 
-// enter the room
 async function joinRoom() {
   const tokenObj = await generateToken();
   await ZegoExpressManager.shared.joinRoom(
-    document.querySelector("#roomID").value,
+    config.roomID,
     tokenObj.token,
     {
       userID: config.userID,
-      userName: config.userID,
-    }
+      userName: config.userName,
+    },
+    [1, 2]
   );
-  const videoDom = ZegoExpressManager.shared.getLocalVideoView();
-  videoDom.controls = true;
-  document
-    .querySelector(".user1")
-    .replaceChild(videoDom, document.querySelector(".user1 video"));
 }
 
-// turn the camera on/off
-function enableCamera(cameraEnable) {
-  const result = ZegoExpressManager.shared.enableCamera(!cameraEnable);
-  result && (cameraEnable = !cameraEnable);
-}
-// switch microphone
-function enableMic(micEnable) {
-  result = ZegoExpressManager.shared.enableMic(!micEnable);
-  result && (micEnable = !micEnable);
-}
-
-// leave the room
-function leaveRoom() {
-  ZegoExpressManager.shared.leaveRoom();
-  setTimeout(function () {
-    document.querySelector(".user").style.display = "block";
-    document.querySelector(".call").style.display = "none";
-  }, 1000);
-}
-
-// 生成token
 function generateToken() {
   // Obtain the token interface provided by the App Server
   return fetch(
@@ -176,4 +129,26 @@ function generateToken() {
       method: "GET",
     }
   ).then((res) => res.json());
+}
+
+function showNotify(title, body, roomID) {
+  document.querySelector(".title").innerHTML = title;
+  document.querySelector(".content").innerHTML = body;
+  document.querySelector(".notify").style.display = "flex";
+  document.querySelector(".notify .refuse").onclick = refuse;
+  document.querySelector(".notify .accept").onclick = accept;
+  config.targetRoomID = roomID;
+}
+
+function refuse() {
+  document.querySelector(".notify").style.display = "none";
+}
+
+function accept() {
+  // enter room
+  ZegoExpressManager.shared.sendCustomCommand(config.roomID, "agree", [
+    config.targetRoomID,
+  ]);
+  window.location.href =
+    "./call.html?roomID=" + config.targetRoomID + "&userID=" + config.userID;
 }

@@ -5,119 +5,31 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ZEGOCLOUD EasyExample Home</title>
+    <link rel="stylesheet" href="./index.css" />
+    <script src="https://unpkg.com/zego-express-engine-webrtc@2.16.1/ZegoExpressWebRTC.js"></script>
   </head>
-  <style>
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      padding: 0;
-      margin: 0;
-    }
-    .user {
-      text-align: center;
-      border: 0px solid #ddd;
-      padding-top: 40vh;
-      color: #646a73;
-      font-size: 14px;
-    }
-    .line {
-      width: 300px;
-      margin: auto;
-      text-align: left;
-      margin-top: 30px;
-    }
-    .user button {
-      background-color: #007aff;
-      margin-left: 20px;
-      border: 0px;
-      height: 32px;
-      border-radius: 5%;
-      color: white;
-    }
-    .user input {
-      border: 0px;
-      border-bottom: 2px solid gray;
-      height: 32px;
-      width: 155px;
-    }
-
-    video {
-      height: 100%;
-    }
-    .user1 {
-      border: 0px solid #ddd;
-      box-sizing: border-box;
-      width: auto;
-      height: 100%;
-      text-align: center;
-    }
-    .user2 {
-      border: 0px solid #ddd;
-      box-sizing: border-box;
-      position: fixed;
-      top: 0px;
-      width: 40vh;
-      right: 0px;
-      height: 30vh;
-    }
-    .publishHandler {
-      position: relative;
-      bottom: 200px;
-      width: 100%;
-      background-color: rgba(221, 221, 221, 0);
-    }
-    .mic,
-    .hangup,
-    .camera {
-      width: 50px;
-      height: 50px;
-      margin-left: 20px;
-      border: rgba(221, 221, 221, 0);
-      border-radius: 50%;
-      background-size: cover;
-    }
-    .mic {
-      background-image: url(./static/micOn.png);
-    }
-    .mic.off {
-      background-image: url(./static/micOff.png);
-    }
-    .hangup {
-      background-image: url(./static/hangUp.png);
-    }
-    .camera {
-      background-image: url(./static/cameraOn.png);
-    }
-    .camera.off {
-      background-image: url(./static/cameraOff.png);
-    }
-  </style>
   <body>
     <div class="user">
       <div class="line">
-        <label>userID:</label>
+        <label>userID(me):</label>
         <span id="userID">xxxx</span>
       </div>
-      <div class="line">
-        <input
-          placeholder="Please enter roomID"
-          id="roomID"
-          title="Users with the same roomID can talk to each other"
-        /><button onClick="goCall()">Call</button>
-      </div>
+      <div class="userList"></div>
     </div>
-    <div class="call" style="display: none; height: 100vh">
-      <div class="user1">
-        <video controls></video>
-        <div class="publishHandler">
-          <button class="mic"></button>
-          <button class="hangup"></button>
-          <button class="camera"></button>
+
+    <div class="notify">
+      <div class="avatar">
+        <img
+          src="https://resource.zegocloud.com/easyExample/call_invite/5-avatar.a71855f3.png"
+        />
+        <div class="context">
+          <div class="title">test</div>
+          <div class="content">teststafsafs</div>
         </div>
       </div>
-      <div class="user2">
-        <video controls></video>
+      <div class="handler">
+        <button class="refuse" onclick="refuse()"></button>
+        <button class="accept" onclick="accept()"></button>
       </div>
     </div>
   </body>

@@ -26,6 +26,6 @@
     "webpack-dev-server": "^4.8.1"
   },
   "dependencies": {
-    "zego-express-engine-webrtc": "^2.15.1"
+    "zego-express-engine-webrtc": "^2.16.0"
   }
 }

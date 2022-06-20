@@ -1,4 +1,6 @@
 import { ZegoExpressEngine } from "zego-express-engine-webrtc";
+import { ZegoBroadcastMessageInfo } from "zego-express-engine-webrtm/sdk/code/zh/ZegoExpressEntity";
+import { ZegoServerResponse } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
 import { ZegoDeviceUpdateType, ZegoMediaOptions, ZegoUser } from "./ZegoExpressManager.entity";
 export declare class ZegoExpressManager {
     private participantDic;
@@ -25,6 +27,10 @@ export declare class ZegoExpressManager {
     onRoomUserUpdate(fun: (updateType: "DELETE" | "ADD", userList: string[], roomID: string) => void): boolean;
     onRoomUserDeviceUpdate(fun: (updateType: ZegoDeviceUpdateType, userID: string, roomID: string) => void): boolean;
     onRoomTokenWillExpire(fun: (roomID: string) => void): boolean;
+    sendCustomCommand(roomID: string, message: string, toUserIDList: string[]): Promise<ZegoServerResponse>;
+    onIMRecvCustomCommand(fun: (roomID: string, fromUser: ZegoUser, command: string) => void): boolean;
+    sendBroadcastMessage(roomID: string, message: string): Promise<import("zego-express-engine-webrtm/sdk/code/zh/ZegoExpressEntity").ZegoServerResponse>;
+    onIMRecvBroadcastMessage(fun: (roomID: string, command: ZegoBroadcastMessageInfo[]) => void): boolean;
     private playStream;
     private generateStreamID;
     private generateVideoView;

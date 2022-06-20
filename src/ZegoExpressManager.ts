@@ -1,8 +1,10 @@
 import { ZegoExpressEngine } from "zego-express-engine-webrtc";
+import { ZegoBroadcastMessageInfo } from "zego-express-engine-webrtm/sdk/code/zh/ZegoExpressEntity";
 import {
   ZegoCapabilityDetection,
   ZegoPlayStats,
   ZegoPublishStats,
+  ZegoServerResponse,
   ZegoStreamList,
 } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
 import {
@@ -269,6 +271,32 @@ export class ZegoExpressManager {
   onRoomTokenWillExpire(fun: (roomID: string) => void) {
     return ZegoExpressManager.engine.on("tokenWillExpire", fun);
   }
+  sendCustomCommand(
+    roomID: string,
+    message: string,
+    toUserIDList: string[]
+  ): Promise<ZegoServerResponse> {
+    return ZegoExpressManager.engine.sendCustomCommand(
+      roomID,
+      message,
+      toUserIDList
+    );
+  }
+  onIMRecvCustomCommand(
+    fun: (roomID: string, fromUser: ZegoUser, command: string) => void
+  ) {
+    return ZegoExpressManager.engine.on("IMRecvCustomCommand", fun);
+  }
+
+  sendBroadcastMessage(roomID: string, message: string) {
+    return ZegoExpressManager.engine.sendBroadcastMessage(roomID, message);
+  }
+  onIMRecvBroadcastMessage(
+    fun: (roomID: string, command: ZegoBroadcastMessageInfo[]) => void
+  ) {
+    return ZegoExpressManager.engine.on("IMRecvBroadcastMessage", fun);
+  }
+
   private async playStream(stream: ZegoStreamList) {
     if (
       this.mediaOptions.includes(ZegoMediaOptions.AutoPlayAudio) ||

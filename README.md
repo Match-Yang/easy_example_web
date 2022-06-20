@@ -1,5 +1,6 @@
 # ZEGOCLOUD easy example
-  <p align="center">
+
+<p align="center">
     <a href="https://zegocloud.github.io/meeting/index.html"><img src="https://img.shields.io/badge/Online%20Demo-Click%20Me-success" alt="Platform"/></a>
     <a href="https://discord.gg/EtNRATttyp">
         <img src="https://img.shields.io/discord/980014613179555870?color=5865F2&logo=discord&logoColor=white" alt="ZEGOCLOUD"/>
@@ -28,12 +29,18 @@ The following will describe how to start this project.
 2. Open Terminal, navigate to the `easy_example_web` folder.
 3. Run the `npm install` command to install all dependencies that are needed.
 
-### Modify the project configurations
+#### Modify the project configurations
 
-![config](/media/init.png)
-
-* You need to modify `appID` and `serverURL` to your own account, which can be obtained in the [ZEGO Admin Console](https://console.zegocloud.com/).
+* You need to modify `appID` to your own account, which can be obtained in the [ZEGO Admin Console](https://console.zegocloud.com/).
 * [Generate a Token on your app server (recommended)](https://docs.zegocloud.com/article/11648), provide an interface for the client to call and replace the generateToken method above.
+
+> If you are using Heroku for your backend service, you can deploy the token generation service by one click.
+>
+> [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ZEGOCLOUD/dynamic_token_server_nodejs)
+>
+> Once done you will get an url for your instance, try accessing `https://<heroku url>/access_token?uid=1234` to check if it works.
+>
+> Check [dynamic_token_server_nodejs](https://github.com/ZEGOCLOUD/dynamic_token_server_nodejs) for more details.
 
 ### Run the sample code
 
