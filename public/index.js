@@ -132,6 +132,14 @@ function goCall() {
 // enter the room
 async function joinRoom() {
   const tokenObj = await generateToken();
+
+  if (!tokenObj.token) {
+    alert(
+      "Please read the readme document first to configure the token correctly！"
+    );
+    return;
+  }
+
   await ZegoExpressManager.shared.joinRoom(
     document.querySelector("#roomID").value,
     tokenObj.token,
