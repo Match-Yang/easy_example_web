@@ -42,7 +42,7 @@ The following will describe how to start this project.
 >
 > Check [dynamic_token_server_nodejs](https://github.com/ZEGOCLOUD/dynamic_token_server_nodejs) for more details.
 >
-> ![config](media/init.jpg)
+> ![config](init.png)
 
 ### Run the sample code
 
