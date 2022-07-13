@@ -115,20 +115,6 @@ export class ZegoExpressManager {
       .then(async (result) => {
         if (result) {
           console.warn("[ZEGOCLOUD LOG][Manager][loginRoom] - Login success");
-          const source = {
-            camera: {
-              audio: true,
-              video: true,
-              facingMode: "user" as "user" | "environment",
-            },
-          };
-          const localStream = await ZegoExpressManager.engine.createStream(
-            source
-          );
-          console.warn(
-            "[ZEGOCLOUD LOG][Manager][createStream] - Create success"
-          );
-          this.streamMap.set(this.localParticipant.streamID, localStream);
 
           this.localParticipant.camera = this.mediaOptions.includes(
             ZegoMediaOptions.PublishLocalVideo
@@ -136,8 +122,22 @@ export class ZegoExpressManager {
           this.localParticipant.mic = this.mediaOptions.includes(
             ZegoMediaOptions.PublishLocalAudio
           );
-
           if (this.localParticipant.camera || this.localParticipant.mic) {
+            const source = {
+              camera: {
+                audio: true,
+                video: true,
+                facingMode: "user" as "user" | "environment",
+              },
+            };
+            const localStream = await ZegoExpressManager.engine.createStream(
+              source
+            );
+            console.warn(
+              "[ZEGOCLOUD LOG][Manager][createStream] - Create success"
+            );
+            this.streamMap.set(this.localParticipant.streamID, localStream);
+
             // Determine if srcObject has been updated
             if (
               this.localParticipant.renderView &&
