@@ -34,13 +34,14 @@ The following will describe how to start this project.
 * You need to modify `appID` to your own account, which can be obtained in the [ZEGO Admin Console](https://console.zegocloud.com/).
 * [Generate a Token on your app server (recommended)](https://docs.zegocloud.com/article/11648), provide an interface for the client to call and replace the generateToken method above.
 
-> If you are using Heroku for your backen service, you can deploy the token generation service by one click.
+> We use Vecel for test backen service, you can deploy the token generation service with one simple click.
 >
-> [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ZEGOCLOUD/dynamic_token_server_nodejs)
+> [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FZEGOCLOUD%2Feasy_server_nextjs&env=ZEGOCLOUD_APP_ID,ZEGOCLOUD_SERVER_SECRET,FA_PROJECT_ID,FA_PRIVATE_KEY_ID,FA_PRIVATE_KEY,FA_CLIENT_EMAIL,FA_CLIENT_ID,FA_CLIENT_X509_CERT_URL)
 >
-> Once done you will get an url for your instance, try accessing `https://<heroku url>/access_token?uid=1234` to check if it works.
+> Once deployed completed, you will get an url for your instance, try accessing `https://your_vercel_project_name.vercel.app/api/get_access_token?uid=123` to check if it works.
 >
-> Check [dynamic_token_server_nodejs](https://github.com/ZEGOCLOUD/dynamic_token_server_nodejs) for more details.
+> Check [easy_server_nextjs](https://github.com/ZEGOCLOUD/easy_server_nextjs) for more details.
+>
 >
 > ![config](init.png)
 
