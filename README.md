@@ -23,7 +23,7 @@ The following will describe how to start this project.
 
 * Create a project in [ZEGOCLOUD Admin Console](https://console.zegocloud.com/). For details, see [ZEGO Admin Console - Project management](https://docs.zegocloud.com/article/1271).
 * Create in firebase to create a project, [see more details ](https://firebase.google.com/docs/web/setup#config-object)
-* Prepare your own server, we provide a heroku template to quickly help you deploy, [click to view details](https://github.com/ZEGOCLOUD/easy_example_call_server_nodejs)
+* Prepare your own server, we provide a Vecel template to quickly help you deploy, [click to view details](https://github.com/ZEGOCLOUD/easy_server_nextjs)
 
 ### Install
 
